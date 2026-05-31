@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA SYNC // Futuristic Biometrics Share</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        mono: ['"Share Tech Mono"', 'monospace'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'neon-cyan': '0 0 15px rgba(6, 182, 212, 0.4)',
+                        'neon-pink': '0 0 15px rgba(236, 72, 153, 0.4)',
+                        'neon-green': '0 0 15px rgba(34, 197, 94, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glow-cyan { text-shadow: 0 0 8px rgba(6, 182, 212, 0.6); }
+        .glow-pink { text-shadow: 0 0 8px rgba(236, 72, 153, 0.6); }
+        .glow-green { text-shadow: 0 0 8px rgba(34, 197, 94, 0.6); }
+        .glow-amber { text-shadow: 0 0 8px rgba(245, 158, 11, 0.6); }
+        
+        .scanline {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0, 242, 254, 0.1) 50%,
+                rgba(0, 242, 254, 0.1)
+            );
+            background-size: 100% 4px;
+        }
+
+        .grid-bg {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        @keyframes scan-anim {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .scanning-bar {
+            animation: scan-anim 4s linear infinite;
+        }
+
+        /* Save indicator pulse */
+        @keyframes save-flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .save-flash { animation: save-flash 0.6s ease-in-out 2; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+        ::-webkit-scrollbar-thumb { background: rgba(6, 182, 212, 0.4); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(6, 182, 212, 0.8); }
+    </style>
+</head>
+<body class="bg-[#070b13] text-slate-100 font-sans selection:bg-cyan-500 selection:text-black overflow-x-hidden min-h-screen">
+
+    <div class="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-cyan-900/15 blur-[120px] pointer-events-none z-0"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-fuchsia-950/20 blur-[120px] pointer-events-none z-0"></div>
+
+    <!-- Navigation Header -->
+    <header class="relative z-10 border-b border-cyan-950/60 bg-slate-950/60 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="relative h-10 w-10 flex items-center justify-center bg-cyan-950/50 border border-cyan-500/30 rounded-lg shadow-neon-cyan">
+                    <i class="fa-solid fa-fingerprint text-cyan-400 text-xl animate-pulse"></i>
+                    <div class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-pink-500 rounded-full"></div>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black font-orbitron tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-fuchsia-500">
+                        AURA SYNC
+                    </h1>
+                    <p class="text-[10px] font-mono text-cyan-400/70 tracking-wider">CYBERNETIC BIOMETRIC ENGINE v2.5</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <!-- Local storage status indicator -->
+                <div id="storageStatus" class="bg-slate-900/80 border border-slate-800 rounded-full px-3 py-1 flex items-center gap-2 text-xs text-slate-400">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500" id="storageIndicatorDot"></span>
+                    <span class="font-mono" id="storageIndicatorText">LOCAL_STORAGE: READY</span>
+                </div>
+                <a href="#editor" class="text-xs font-mono border border-cyan-500/20 hover:border-cyan-400/80 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 px-4 py-1.5 rounded transition-all duration-300">
+                    <i class="fa-solid fa-bolt mr-1"></i> SYNC DATA
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10 max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8" id="editor">
+        
+        <!-- Left Side: Configurator Controls (5 Columns) -->
+        <section class="lg:col-span-5 space-y-6">
+            <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-xl relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-8 h-[1px] bg-cyan-500"></div>
+                <div class="absolute top-0 left-0 w-[1px] h-8 bg-cyan-500"></div>
+                <div class="absolute bottom-0 right-0 w-8 h-[1px] bg-fuchsia-500"></div>
+                <div class="absolute bottom-0 right-0 w-[1px] h-8 bg-fuchsia-500"></div>
+                
+                <h2 class="text-lg font-bold font-orbitron text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 mb-4 tracking-wide flex items-center justify-between">
+                    <span><i class="fa-solid fa-keyboard text-cyan-400 mr-2"></i>BIOMETRICS INPUT</span>
+                    <span class="text-xs font-mono text-slate-500">MANUAL OVERRIDE</span>
+                </h2>
+
+                <!-- Metric System Switcher -->
+                <div class="grid grid-cols-2 gap-2 p-1 bg-slate-900 rounded-lg mb-6 border border-slate-800">
+                    <button id="btnMetric" onclick="setUnitSystem('metric')" class="py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all duration-300 bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                        METRIC (KG / CM)
+                    </button>
+                    <button id="btnImperial" onclick="setUnitSystem('imperial')" class="py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all duration-300 text-slate-500 hover:text-slate-300">
+                        IMPERIAL (LBS / FT)
+                    </button>
+                </div>
+
+                <!-- Input Controls -->
+                <div class="space-y-4">
+                    <!-- Bodyweight -->
+                    <div>
+                        <label class="block text-xs font-mono text-slate-300 mb-1.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-weight-scale text-cyan-400"></i> BODYWEIGHT
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="weight" step="0.1" value="72.5" oninput="updateStats(); saveToLocalStorage()" 
+                                   class="w-full bg-slate-900/60 border border-slate-800 focus:border-cyan-500/80 text-cyan-300 font-mono text-sm rounded-lg px-4 py-2.5 pr-16 focus:outline-none transition-all">
+                            <span class="absolute right-4 top-2.5 text-xs font-mono text-slate-500" id="weightUnitText">kg</span>
+                        </div>
+                    </div>
+
+                    <!-- Fat Percentage -->
+                    <div>
+                        <label class="block text-xs font-mono text-slate-300 mb-1.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-percent text-fuchsia-400"></i> BODY FAT PERCENTAGE
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="fat" step="0.1" value="15.4" oninput="updateStats(); saveToLocalStorage()" 
+                                   class="w-full bg-slate-900/60 border border-slate-800 focus:border-fuchsia-500/80 text-fuchsia-300 font-mono text-sm rounded-lg px-4 py-2.5 pr-16 focus:outline-none transition-all">
+                            <span class="absolute right-4 top-2.5 text-xs font-mono text-slate-500">%</span>
+                        </div>
+                    </div>
+
+                    <!-- Muscle Mass -->
+                    <div>
+                        <label class="block text-xs font-mono text-slate-300 mb-1.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-dumbbell text-emerald-400"></i> MUSCLE MASS
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="muscle" step="0.1" value="58.2" oninput="updateStats(); saveToLocalStorage()" 
+                                   class="w-full bg-slate-900/60 border border-slate-800 focus:border-emerald-500/80 text-emerald-300 font-mono text-sm rounded-lg px-4 py-2.5 pr-16 focus:outline-none transition-all">
+                            <span class="absolute right-4 top-2.5 text-xs font-mono text-slate-500" id="muscleUnitText">kg</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- BMR -->
+                        <div>
+                            <label class="block text-xs font-mono text-slate-300 mb-1.5 flex items-center gap-1.5">
+                                <i class="fa-solid fa-fire text-amber-400"></i> METABOLISM (BMR)
+                            </label>
+                            <div class="relative">
+                                <input type="number" id="bmr" step="10" value="1745" oninput="updateStats(); saveToLocalStorage()" 
+                                       class="w-full bg-slate-900/60 border border-slate-800 focus:border-amber-500/80 text-amber-300 font-mono text-sm rounded-lg px-4 py-2.5 pr-12 focus:outline-none transition-all">
+                                <span class="absolute right-3 top-2.5 text-[9px] font-mono text-slate-500">kcal</span>
+                            </div>
+                        </div>
+
+                        <!-- Target Calorie -->
+                        <div>
+                            <label class="block text-xs font-mono text-slate-300 mb-1.5 flex items-center gap-1.5">
+                                <i class="fa-solid fa-bullseye text-teal-400"></i> CALORIE TARGET
+                            </label>
+                            <div class="relative">
+                                <input type="number" id="targetBudget" step="50" value="2000" oninput="updateStats(); saveToLocalStorage()" 
+                                       class="w-full bg-slate-900/60 border border-slate-800 focus:border-teal-500/80 text-teal-300 font-mono text-sm rounded-lg px-4 py-2.5 pr-12 focus:outline-none transition-all">
+                                <span class="absolute right-3 top-2.5 text-[9px] font-mono text-slate-500">kcal</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Visceral Fat -->
+                        <div>
+                            <label class="block text-xs font-mono text-slate-300 mb-1.5 flex items-center gap-1.5">
+                                <i class="fa-solid fa-shield-virus text-violet-400"></i> VISCERAL FAT
+                            </label>
+                            <div class="relative">
+                                <input type="number" id="visceral" step="1" value="5" oninput="updateStats(); saveToLocalStorage()" 
+                                       class="w-full bg-slate-900/60 border border-slate-800 focus:border-violet-500/80 text-violet-300 font-mono text-sm rounded-lg px-4 py-2.5 pr-12 focus:outline-none transition-all">
+                                <span class="absolute right-3 top-2.5 text-[9px] font-mono text-slate-500">LVL</span>
+                            </div>
+                        </div>
+
+                        <!-- Body Age -->
+                        <div>
+                            <label class="block text-xs font-mono text-slate-300 mb-1.5 flex items-center gap-1.5">
+                                <i class="fa-solid fa-cake-candles text-rose-400"></i> BODY AGE
+                            </label>
+                            <div class="relative">
+                                <input type="number" id="bodyAge" step="1" value="24" oninput="updateStats(); saveToLocalStorage()" 
+                                       class="w-full bg-slate-900/60 border border-slate-800 focus:border-rose-500/80 text-rose-300 font-mono text-sm rounded-lg px-4 py-2.5 pr-12 focus:outline-none transition-all">
+                                <span class="absolute right-3 top-2.5 text-[9px] font-mono text-slate-500">YRS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meal Tracker -->
+            <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-8 h-[1px] bg-emerald-500"></div>
+                <div class="absolute top-0 right-0 w-[1px] h-8 bg-emerald-500"></div>
+                
+                <h3 class="text-xs font-mono text-emerald-400 tracking-widest uppercase mb-4 flex items-center justify-between">
+                    <span><i class="fa-solid fa-utensils mr-2"></i>MEAL TRACKER LOG</span>
+                    <span id="trackedMealsCount" class="text-[9px] px-2 py-0.5 rounded bg-emerald-950/50 border border-emerald-500/30 text-emerald-300">0 LOGS</span>
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 mb-4">
+                    <div class="sm:col-span-7 relative">
+                        <input type="text" id="newMealName" placeholder="Meal Name (e.g., Breakfast)" 
+                               class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 text-slate-100 font-mono text-xs rounded-lg px-3 py-2 focus:outline-none">
+                    </div>
+                    <div class="sm:col-span-3 relative">
+                        <input type="number" id="newMealCals" placeholder="kcal" min="0" 
+                               class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 text-slate-100 font-mono text-xs rounded-lg px-3 py-2 pr-6 focus:outline-none">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <button onclick="addMealItem()" class="w-full bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/40 text-emerald-300 rounded-lg py-2 text-xs font-bold transition-all flex items-center justify-center">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="mealListContainer" class="max-h-[140px] overflow-y-auto space-y-2 mb-4 pr-1">
+                    <div class="text-center py-4 text-[10px] font-mono text-slate-600 border border-dashed border-slate-900 rounded-lg">
+                        NO MEALS RECORDED. SYNC ACTIVE BUDGET.
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-900 pt-3 flex items-center justify-between text-xs font-mono text-slate-400">
+                    <div>
+                        <span>TOTAL CALORIES:</span>
+                        <span id="sumTotalCals" class="text-emerald-400 font-bold ml-1">0 kcal</span>
+                    </div>
+                    <div>
+                        <span>DEFICIT REMAINING:</span>
+                        <span id="netRemainingCals" class="text-teal-400 font-bold ml-1">2,000 kcal</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customization Panel -->
+            <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-xl relative overflow-hidden">
+                <h3 class="text-xs font-mono text-slate-400 tracking-widest uppercase mb-4">Aesthetics & Card Settings</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-mono text-slate-300 mb-1.5">SUBJECT IDENTIFICATION</label>
+                        <div class="relative">
+                            <input type="text" id="subjectName" value="AGENT_NEO" oninput="updateStats(); saveToLocalStorage()" 
+                                   class="w-full bg-slate-900/60 border border-slate-800 focus:border-cyan-500/80 text-cyan-300 placeholder-slate-700 font-mono text-sm rounded-lg px-4 py-2 pl-10 focus:outline-none transition-all">
+                            <i class="fa-solid fa-user-astronaut absolute left-3.5 top-3 text-slate-600 text-xs"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-mono text-slate-300 mb-1.5">CARD TEMPLATE LAYOUT</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="btnRatio11" onclick="changeAspect('1:1')" class="py-2 px-3 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono text-xs text-center flex items-center justify-center gap-2">
+                                <i class="fa-regular fa-square"></i> SQ FEED (1:1)
+                            </button>
+                            <button id="btnRatio916" onclick="changeAspect('9:16')" class="py-2 px-3 rounded bg-slate-900 text-slate-500 border border-slate-800 hover:text-slate-300 font-mono text-xs text-center flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-mobile-screen"></i> STORIES (9:16)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-mono text-slate-300 mb-1.5">ENERGY SPECTRUM (THEME)</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="setTheme('cyberpunk')" class="p-2 rounded bg-slate-900 border border-pink-500/20 text-pink-400 text-xs font-mono hover:bg-slate-850 flex flex-col items-center gap-1">
+                                <span class="w-3 h-3 rounded-full bg-gradient-to-r from-pink-500 to-cyan-400"></span>
+                                CYBERPUNK
+                            </button>
+                            <button onclick="setTheme('quantum')" class="p-2 rounded bg-slate-900 border border-emerald-500/20 text-emerald-400 text-xs font-mono hover:bg-slate-850 flex flex-col items-center gap-1">
+                                <span class="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400"></span>
+                                QUANTUM
+                            </button>
+                            <button onclick="setTheme('solar')" class="p-2 rounded bg-slate-900 border border-amber-500/20 text-amber-400 text-xs font-mono hover:bg-slate-850 flex flex-col items-center gap-1">
+                                <span class="w-3 h-3 rounded-full bg-gradient-to-r from-amber-500 to-rose-500"></span>
+                                SOLAR FLARE
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Panel -->
+            <div class="flex flex-col gap-3">
+                <button onclick="triggerHologramScan()" class="w-full bg-gradient-to-r from-cyan-500 via-blue-600 to-fuchsia-600 hover:from-cyan-400 hover:via-blue-500 hover:to-fuchsia-500 text-white font-orbitron font-bold py-4 rounded-xl shadow-lg hover:shadow-cyan-500/30 transition-all duration-300 flex items-center justify-center gap-3 tracking-widest text-sm border-t border-white/20">
+                    <i class="fa-solid fa-network-wired animate-pulse"></i> INITIATE MATRIX SYNC
+                </button>
+                
+                <button onclick="exportCard()" class="w-full bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-200 font-mono py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-xs">
+                    <i class="fa-solid fa-download"></i> EXPORT TO HI-RES SOCIAL IMAGE (PNG)
+                </button>
+
+                <!-- Local Data Management -->
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="saveToLocalStorage(true)" class="bg-slate-900 hover:bg-emerald-950/40 border border-emerald-800/40 hover:border-emerald-500/50 text-emerald-400/70 hover:text-emerald-300 font-mono py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-xs">
+                        <i class="fa-solid fa-floppy-disk"></i> SAVE LOCAL
+                    </button>
+                    <button onclick="clearLocalStorage()" class="bg-slate-900 hover:bg-rose-950/40 border border-rose-900/40 hover:border-rose-500/50 text-rose-500/60 hover:text-rose-400 font-mono py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-xs">
+                        <i class="fa-solid fa-trash-can"></i> CLEAR DATA
+                    </button>
+                </div>
+
+                <!-- Last saved timestamp -->
+                <p class="text-center text-[9px] font-mono text-slate-600" id="lastSavedText">LAST SAVE: —</p>
+            </div>
+        </section>
+
+        <!-- Right Side: Live Preview Card -->
+        <section class="lg:col-span-7 flex flex-col items-center justify-start gap-4">
+            
+            <div class="flex items-center justify-between w-full max-w-[500px]">
+                <h3 class="text-xs font-mono text-cyan-400 tracking-widest uppercase">
+                    <i class="fa-solid fa-display mr-1"></i> HOLO-PREVIEW MONITOR
+                </h3>
+                <span class="text-[10px] font-mono text-slate-500">ACTIVE RENDER FRAME</span>
+            </div>
+
+            <div id="exportContainer" class="p-4 bg-[#05080e] rounded-3xl border border-slate-950 flex items-center justify-center shadow-2xl relative overflow-hidden">
+                
+                <div id="shareCard" class="relative overflow-hidden flex flex-col justify-between font-sans grid-bg select-none transition-all duration-500 ease-in-out border-2" 
+                     style="width: 480px; height: 480px; background-color: #060a12; border-color: rgba(6, 182, 212, 0.25);">
+                    
+                    <div id="scanningBar" class="scanning-bar absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent z-20 pointer-events-none" style="top: 0;"></div>
+                    <div class="absolute inset-0 scanline pointer-events-none opacity-[0.15] z-10"></div>
+                    
+                    <!-- TOP PROFILE CORNER HUD -->
+                    <div class="p-6 relative z-10 flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center gap-2.5 mb-1.5">
+                                <div class="w-2.5 h-2.5 bg-cyan-400 animate-pulse rounded-full" id="themeDot"></div>
+                                <span class="font-mono text-xs font-bold tracking-widest text-cyan-400" id="cardSubject">AGENT_NEO</span>
+                                <span class="text-[9px] font-mono text-slate-500 px-1.5 py-0.5 bg-slate-900 border border-slate-800 rounded">SYS_LVL_7</span>
+                            </div>
+                            <h2 class="text-xl font-orbitron font-black text-white tracking-wider flex items-center gap-1.5 leading-none">
+                                BIOMETRICS SCAN
+                            </h2>
+                            <p class="text-[10px] font-mono text-slate-400 mt-1 uppercase" id="cardDate">SYNC: 2026.05.31_08:58</p>
+                        </div>
+                        
+                        <div class="text-right font-mono text-[9px] text-slate-500 leading-normal">
+                            <div>SEC_SECURE // AURA_S_V2</div>
+                            <div>LOC_SYNC_09 // OK</div>
+                            <div class="text-cyan-400/80" id="sysThemeText">SPECTRUM: CYBERPUNK</div>
+                        </div>
+                    </div>
+
+                    <!-- MIDDLE SECTION: GAUGES -->
+                    <div class="px-6 flex items-center justify-around gap-4 relative z-10 flex-1">
+                        
+                        <!-- Weight Gauge -->
+                        <div class="relative flex flex-col items-center justify-center">
+                            <div class="relative w-36 h-36 flex items-center justify-center">
+                                <svg class="absolute inset-0 transform -rotate-90" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="2" fill="transparent" class="text-slate-800" />
+                                    <circle id="weightRing" cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4.5" fill="transparent" class="text-cyan-400 filter drop-shadow-[0_0_4px_rgba(6,182,212,0.8)]" stroke-dasharray="276" stroke-dashoffset="100" />
+                                </svg>
+                                <div class="text-center z-10">
+                                    <p class="text-[9px] font-mono tracking-widest text-slate-400 uppercase leading-none">WEIGHT</p>
+                                    <p class="text-2xl font-black font-orbitron mt-1 text-white leading-none tracking-tight" id="cardWeight">72.5</p>
+                                    <p class="text-[10px] font-mono text-cyan-400 mt-1 leading-none font-bold" id="cardWeightUnit">KG</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Body Fat Gauge -->
+                        <div class="relative flex flex-col items-center justify-center">
+                            <div class="relative w-36 h-36 flex items-center justify-center">
+                                <svg class="absolute inset-0 transform -rotate-90" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="2" fill="transparent" class="text-slate-800" />
+                                    <circle id="fatRing" cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4.5" fill="transparent" class="text-pink-500 filter drop-shadow-[0_0_4px_rgba(236,72,153,0.8)]" stroke-dasharray="276" stroke-dashoffset="180" />
+                                </svg>
+                                <div class="text-center z-10">
+                                    <p class="text-[9px] font-mono tracking-widest text-slate-400 uppercase leading-none">BODY FAT</p>
+                                    <p class="text-2xl font-black font-orbitron mt-1 text-white leading-none tracking-tight" id="cardFat">15.4</p>
+                                    <p class="text-[10px] font-mono text-pink-500 mt-1 leading-none font-bold">%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BOTTOM GRID: TELEMETRY DATA -->
+                    <div class="p-6 relative z-10">
+                        <div class="relative h-[1px] bg-slate-800 mb-5 flex items-center justify-between">
+                            <div class="w-1.5 h-1.5 bg-cyan-400 rounded-sm -mt-0.5"></div>
+                            <div class="text-[8px] font-mono text-slate-400 bg-slate-950 px-2 uppercase tracking-widest">AUXILIARY INDEXES</div>
+                            <div class="w-1.5 h-1.5 bg-fuchsia-400 rounded-sm -mt-0.5"></div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="bg-slate-900/40 border border-slate-800/80 p-2 rounded-lg text-center relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <span class="text-[8px] font-mono text-slate-400 block tracking-wider mb-1 uppercase">MUSCLE</span>
+                                <span class="text-sm font-bold font-orbitron text-emerald-400 block" id="cardMuscle">58.2</span>
+                                <span class="text-[8px] font-mono text-slate-500 block uppercase" id="cardMuscleUnit">KG</span>
+                            </div>
+
+                            <div class="bg-slate-900/40 border border-slate-800/80 p-2 rounded-lg text-center relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <span class="text-[8px] font-mono text-slate-400 block tracking-wider mb-1 uppercase">METABOLISM</span>
+                                <span class="text-sm font-bold font-orbitron text-amber-400 block" id="cardBmr">1745</span>
+                                <span class="text-[8px] font-mono text-slate-500 block uppercase">KCAL</span>
+                            </div>
+
+                            <div class="bg-slate-900/40 border border-slate-800/80 p-2 rounded-lg text-center relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <span class="text-[8px] font-mono text-slate-400 block tracking-wider mb-1 uppercase">LOGGED INTAKE</span>
+                                <span class="text-sm font-bold font-orbitron text-emerald-400 block" id="cardTotalIntake">0</span>
+                                <span class="text-[8px] font-mono text-slate-500 block uppercase">KCAL</span>
+                            </div>
+
+                            <div class="bg-slate-900/40 border border-slate-800/80 p-2 rounded-lg text-center relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <span class="text-[8px] font-mono text-slate-400 block tracking-wider mb-1 uppercase">VISCERAL</span>
+                                <span class="text-sm font-bold font-orbitron text-violet-400 block" id="cardVisceral">5</span>
+                                <span class="text-[8px] font-mono text-slate-500 block uppercase">LEVEL</span>
+                            </div>
+
+                            <div class="bg-slate-900/40 border border-slate-800/80 p-2 rounded-lg text-center relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-rose-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <span class="text-[8px] font-mono text-slate-400 block tracking-wider mb-1 uppercase">BODY AGE</span>
+                                <span class="text-sm font-bold font-orbitron text-rose-400 block" id="cardBodyAge">24</span>
+                                <span class="text-[8px] font-mono text-slate-500 block uppercase">YEARS</span>
+                            </div>
+
+                            <div class="bg-slate-900/40 border border-slate-800/80 p-2 rounded-lg text-center relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <span class="text-[8px] font-mono text-slate-400 block tracking-wider mb-1 uppercase" id="deficitLabel">DEFICIT REMAIN</span>
+                                <span class="text-sm font-bold font-orbitron block" id="cardBudgetLeft">2000</span>
+                                <span class="text-[8px] font-mono text-slate-500 block uppercase" id="deficitUnit">KCAL LEFT</span>
+                            </div>
+                        </div>
+
+                        <!-- Meal Feed -->
+                        <div class="mt-4 bg-slate-950/60 border border-slate-900 p-2.5 rounded-lg">
+                            <div class="flex items-center justify-between text-[8px] font-mono text-slate-500 mb-1">
+                                <span class="text-cyan-400/80"><i class="fa-solid fa-server mr-1"></i> MEALS_TELEMETRY_FEED:</span>
+                                <span id="cardMealsCount">0 ACTIVE LOGS</span>
+                            </div>
+                            <div id="cardMealFeed" class="text-[9px] font-mono text-slate-400 space-y-0.5 max-h-[44px] overflow-hidden">
+                                <div class="text-slate-600 italic">> NO LOCAL MEALS SYNCHRONIZED...</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 flex justify-between items-center text-[9px] font-mono text-slate-500">
+                            <span>AURA_HEALTH_PROTOCOL_INITIATED</span>
+                            <span>DECIBEL RATIO: N/A</span>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!-- Toast Notification -->
+            <div id="toastNotification" class="w-full max-w-[480px] bg-slate-950 border border-cyan-500/30 text-cyan-300 font-mono text-xs px-4 py-3 rounded-xl flex items-center justify-between shadow-neon-cyan/10 opacity-0 transition-opacity duration-300 pointer-events-none">
+                <span id="toastMsg"><i class="fa-solid fa-microchip mr-2 animate-spin"></i> GENERATING PNG RENDER...</span>
+                <i class="fa-solid fa-xmark cursor-pointer hover:text-white" onclick="hideToast()"></i>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Guide Section -->
+    <section class="max-w-7xl mx-auto px-4 py-12 relative z-10">
+        <div class="border-t border-slate-900 pt-10">
+            <h3 class="text-sm font-mono text-cyan-400 tracking-wider mb-6">INTELLIGENT DIAGNOSTIC FRAMEWORK GUIDE</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-slate-400 text-xs leading-relaxed">
+                <div class="bg-slate-950/40 p-5 rounded-xl border border-slate-900">
+                    <h4 class="font-orbitron font-bold text-white text-sm mb-2 text-cyan-400">1. INPUT DATA</h4>
+                    <p>Adjust weight, fat, muscle, BMR, visceral fat, and body age on the sidebar. Select your name or pseudonym to tag your scan output.</p>
+                </div>
+                <div class="bg-slate-950/40 p-5 rounded-xl border border-slate-900">
+                    <h4 class="font-orbitron font-bold text-white text-sm mb-2 text-fuchsia-400">2. STYLE THE THEME</h4>
+                    <p>Cycle between dynamic cybernetic colors, choose portrait format (Stories) or square format (Instagram Feed), and hit 'Matrix Sync' to lock metrics.</p>
+                </div>
+                <div class="bg-slate-950/40 p-5 rounded-xl border border-slate-900">
+                    <h4 class="font-orbitron font-bold text-white text-sm mb-2 text-emerald-400">3. DATA PERSISTS LOCALLY</h4>
+                    <p>All biometric entries and meal logs are auto-saved to your browser's local storage. Your data never leaves your device — no server, no cloud, no account needed.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-slate-950/90 border-t border-slate-900 py-8 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-500">
+            <p>© 2026 AURA SYNC SYSTEMS INC. GENERAL PUBLIC HEALTH PROTOCOL ACCESS.</p>
+            <p>DESIGNED FOR THE NEXT METABOLIC ERA // DATA STORED SECURELY LOCALLY</p>
+        </div>
+    </footer>
+
+    <script>
+        // ─── CONSTANTS ────────────────────────────────────────────────────────────
+        const STORAGE_KEY = 'aura_sync_v1';
+
+        // ─── STATE ────────────────────────────────────────────────────────────────
+        let unitSystem   = 'metric';
+        let currentTheme = 'cyberpunk';
+        let currentAspect = '1:1';
+        let loggedMeals  = [];
+
+        // ─── DOM REFS ─────────────────────────────────────────────────────────────
+        const weightInput      = document.getElementById('weight');
+        const fatInput         = document.getElementById('fat');
+        const muscleInput      = document.getElementById('muscle');
+        const bmrInput         = document.getElementById('bmr');
+        const targetBudgetInput= document.getElementById('targetBudget');
+        const visceralInput    = document.getElementById('visceral');
+        const bodyAgeInput     = document.getElementById('bodyAge');
+        const subjectNameInput = document.getElementById('subjectName');
+        const cardSubject      = document.getElementById('cardSubject');
+        const cardDate         = document.getElementById('cardDate');
+        const cardWeight       = document.getElementById('cardWeight');
+        const cardWeightUnit   = document.getElementById('cardWeightUnit');
+        const cardFat          = document.getElementById('cardFat');
+        const cardMuscle       = document.getElementById('cardMuscle');
+        const cardMuscleUnit   = document.getElementById('cardMuscleUnit');
+        const cardBmr          = document.getElementById('cardBmr');
+        const cardVisceral     = document.getElementById('cardVisceral');
+        const cardBodyAge      = document.getElementById('cardBodyAge');
+        const cardTotalIntake  = document.getElementById('cardTotalIntake');
+        const cardBudgetLeft   = document.getElementById('cardBudgetLeft');
+        const deficitLabel     = document.getElementById('deficitLabel');
+        const deficitUnit      = document.getElementById('deficitUnit');
+        const weightRing       = document.getElementById('weightRing');
+        const fatRing          = document.getElementById('fatRing');
+
+        // ─── LOCAL STORAGE ────────────────────────────────────────────────────────
+
+        /**
+         * Persist all current state to localStorage.
+         * @param {boolean} [explicit=false] - If true, show a confirmation toast.
+         */
+        function saveToLocalStorage(explicit = false) {
+            try {
+                const data = {
+                    unitSystem,
+                    currentTheme,
+                    currentAspect,
+                    loggedMeals,
+                    savedAt: new Date().toISOString(),
+                    fields: {
+                        weight:       weightInput.value,
+                        fat:          fatInput.value,
+                        muscle:       muscleInput.value,
+                        bmr:          bmrInput.value,
+                        targetBudget: targetBudgetInput.value,
+                        visceral:     visceralInput.value,
+                        bodyAge:      bodyAgeInput.value,
+                        subjectName:  subjectNameInput.value,
+                    }
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                updateStorageStatus(true, data.savedAt);
+                if (explicit) {
+                    showToast("<i class='fa-solid fa-floppy-disk text-emerald-400 mr-2'></i> DATA SAVED TO LOCAL STORAGE SUCCESSFULLY.");
+                }
+            } catch (e) {
+                updateStorageStatus(false);
+                if (explicit) {
+                    showToast("<i class='fa-solid fa-triangle-exclamation text-rose-500 mr-2'></i> LOCAL STORAGE WRITE FAILED.");
+                }
+            }
+        }
+
+        /** Load state from localStorage and restore the UI. */
+        function loadFromLocalStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return false;
+
+                const data = JSON.parse(raw);
+
+                // Restore fields
+                const f = data.fields || {};
+                if (f.weight)       weightInput.value       = f.weight;
+                if (f.fat)          fatInput.value          = f.fat;
+                if (f.muscle)       muscleInput.value       = f.muscle;
+                if (f.bmr)          bmrInput.value          = f.bmr;
+                if (f.targetBudget) targetBudgetInput.value = f.targetBudget;
+                if (f.visceral)     visceralInput.value     = f.visceral;
+                if (f.bodyAge)      bodyAgeInput.value      = f.bodyAge;
+                if (f.subjectName)  subjectNameInput.value  = f.subjectName;
+
+                // Restore meals
+                if (Array.isArray(data.loggedMeals)) {
+                    loggedMeals = data.loggedMeals;
+                }
+
+                // Restore settings
+                if (data.unitSystem)    unitSystem    = data.unitSystem;
+                if (data.currentAspect) currentAspect = data.currentAspect;
+
+                // Apply unit labels
+                applyUnitLabels();
+
+                // Restore theme & aspect
+                if (data.currentTheme) setTheme(data.currentTheme);
+                if (data.currentAspect) changeAspect(data.currentAspect);
+
+                updateStorageStatus(true, data.savedAt);
+                return true;
+            } catch (e) {
+                updateStorageStatus(false);
+                return false;
+            }
+        }
+
+        /** Prompt confirmation before wiping all saved data. */
+        function clearLocalStorage() {
+            if (!confirm('CLEAR ALL SAVED DATA?\n\nThis will remove all biometrics and meal logs from local storage. This cannot be undone.')) return;
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+                loggedMeals = [];
+                updateStats();
+                updateStorageStatus(false);
+                document.getElementById('lastSavedText').textContent = 'LAST SAVE: —';
+                showToast("<i class='fa-solid fa-trash text-amber-400 mr-2'></i> LOCAL STORAGE CLEARED. DATA RESET.");
+            } catch (e) {
+                showToast("<i class='fa-solid fa-triangle-exclamation text-rose-500 mr-2'></i> CLEAR FAILED — STORAGE ERROR.");
+            }
+        }
+
+        /** Update the header storage status indicator. */
+        function updateStorageStatus(ok, isoTimestamp) {
+            const dot  = document.getElementById('storageIndicatorDot');
+            const text = document.getElementById('storageIndicatorText');
+            const last = document.getElementById('lastSavedText');
+
+            if (ok) {
+                dot.className  = 'w-2 h-2 rounded-full bg-emerald-500';
+                text.textContent = 'LOCAL_STORAGE: SYNCED';
+                if (isoTimestamp) {
+                    const d = new Date(isoTimestamp);
+                    const pad = n => String(n).padStart(2, '0');
+                    last.textContent = `LAST SAVE: ${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+                }
+            } else {
+                dot.className  = 'w-2 h-2 rounded-full bg-slate-600';
+                text.textContent = 'LOCAL_STORAGE: EMPTY';
+            }
+        }
+
+        // ─── UNIT SYSTEM ──────────────────────────────────────────────────────────
+
+        /** Apply correct unit label text without resetting field values. */
+        function applyUnitLabels() {
+            const weightUnitText = document.getElementById('weightUnitText');
+            const muscleUnitText = document.getElementById('muscleUnitText');
+            const btnMetric      = document.getElementById('btnMetric');
+            const btnImperial    = document.getElementById('btnImperial');
+
+            if (unitSystem === 'metric') {
+                btnMetric.className   = 'py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all duration-300 bg-cyan-500/20 text-cyan-300 border border-cyan-500/30';
+                btnImperial.className = 'py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all duration-300 text-slate-500 hover:text-slate-300';
+                weightUnitText.innerText = 'kg';
+                muscleUnitText.innerText = 'kg';
+                cardWeightUnit.innerText = 'KG';
+                cardMuscleUnit.innerText = 'KG';
+            } else {
+                btnImperial.className = 'py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all duration-300 bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30';
+                btnMetric.className   = 'py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all duration-300 text-slate-500 hover:text-slate-300';
+                weightUnitText.innerText = 'lbs';
+                muscleUnitText.innerText = 'lbs';
+                cardWeightUnit.innerText = 'LBS';
+                cardMuscleUnit.innerText = 'LBS';
+            }
+        }
+
+        function setUnitSystem(system) {
+            unitSystem = system;
+
+            if (system === 'metric') {
+                weightInput.value = '72.5';
+                muscleInput.value = '58.2';
+            } else {
+                weightInput.value = '160.0';
+                muscleInput.value = '128.5';
+            }
+
+            applyUnitLabels();
+            updateStats();
+            saveToLocalStorage();
+        }
+
+        // ─── MEAL TRACKER ─────────────────────────────────────────────────────────
+
+        function addMealItem() {
+            const nameInput = document.getElementById('newMealName');
+            const calsInput = document.getElementById('newMealCals');
+            const name = nameInput.value.trim().toUpperCase() || `MEAL_${loggedMeals.length + 1}`;
+            const cals = parseInt(calsInput.value) || 0;
+
+            if (cals < 0) {
+                showToast("<i class='fa-solid fa-circle-exclamation text-rose-500 mr-2'></i> CALORIES CANNOT BE NEGATIVE.");
+                return;
+            }
+
+            loggedMeals.push({ name, cals });
+            nameInput.value = '';
+            calsInput.value = '';
+            showToast(`<i class='fa-solid fa-check text-emerald-400 mr-2'></i> LOGGED ${name} (${cals} KCAL)`);
+            updateStats();
+            saveToLocalStorage();
+        }
+
+        function deleteMealItem(index) {
+            const removed = loggedMeals[index];
+            loggedMeals.splice(index, 1);
+            showToast(`<i class='fa-solid fa-trash text-amber-400 mr-2'></i> REMOVED ${removed.name}`);
+            updateStats();
+            saveToLocalStorage();
+        }
+
+        // ─── LIVE STATS UPDATE ────────────────────────────────────────────────────
+
+        function updateStats() {
+            const weight      = parseFloat(weightInput.value)       || 0;
+            const fat         = parseFloat(fatInput.value)          || 0;
+            const muscle      = parseFloat(muscleInput.value)       || 0;
+            const bmr         = parseInt(bmrInput.value)            || 0;
+            const targetBudget= parseInt(targetBudgetInput.value)   || 0;
+            const visceral    = parseInt(visceralInput.value)       || 0;
+            const bodyAge     = parseInt(bodyAgeInput.value)        || 0;
+            const subjectName = subjectNameInput.value.toUpperCase().replace(/\s+/g, '_');
+
+            // Meal totals
+            const totalMealCals   = loggedMeals.reduce((s, m) => s + m.cals, 0);
+            const remainingBudget = targetBudget - totalMealCals;
+
+            // Meal list sidebar
+            const mealListContainer = document.getElementById('mealListContainer');
+            const trackedMealsCount = document.getElementById('trackedMealsCount');
+            const sumTotalCals      = document.getElementById('sumTotalCals');
+            const netRemainingCals  = document.getElementById('netRemainingCals');
+
+            if (loggedMeals.length === 0) {
+                mealListContainer.innerHTML = `
+                    <div class="text-center py-4 text-[10px] font-mono text-slate-600 border border-dashed border-slate-900 rounded-lg">
+                        NO MEALS RECORDED. SYNC ACTIVE BUDGET.
+                    </div>`;
+                trackedMealsCount.innerText = '0 LOGS';
+            } else {
+                trackedMealsCount.innerText = `${loggedMeals.length} LOGS`;
+                mealListContainer.innerHTML = loggedMeals.map((meal, idx) => `
+                    <div class="flex items-center justify-between bg-slate-900/60 border border-slate-800 rounded-lg px-3 py-1.5 text-xs font-mono">
+                        <span class="text-slate-300 font-bold tracking-wider">${meal.name}</span>
+                        <div class="flex items-center gap-3">
+                            <span class="text-emerald-400 font-bold">${meal.cals} kcal</span>
+                            <button onclick="deleteMealItem(${idx})" class="text-rose-500/60 hover:text-rose-400 transition-colors">
+                                <i class="fa-solid fa-trash-can text-[11px]"></i>
+                            </button>
+                        </div>
+                    </div>`).join('');
+            }
+
+            sumTotalCals.innerText = `${totalMealCals.toLocaleString()} kcal`;
+
+            if (remainingBudget >= 0) {
+                netRemainingCals.innerText   = `${remainingBudget.toLocaleString()} kcal`;
+                netRemainingCals.className   = 'text-emerald-400 font-bold ml-1';
+            } else {
+                netRemainingCals.innerText   = `OVER BY ${Math.abs(remainingBudget).toLocaleString()} kcal`;
+                netRemainingCals.className   = 'text-rose-400 font-bold ml-1 animate-pulse';
+            }
+
+            // Card display
+            cardSubject.innerText  = subjectName || 'SUBJECT_01';
+            cardWeight.innerText   = weight.toFixed(1);
+            cardFat.innerText      = fat.toFixed(1);
+            cardMuscle.innerText   = muscle.toFixed(1);
+            cardBmr.innerText      = bmr;
+            cardVisceral.innerText = visceral;
+            cardBodyAge.innerText  = bodyAge;
+            cardDate.innerText     = formatSysDate();
+            cardTotalIntake.innerText = totalMealCals;
+
+            if (remainingBudget >= 0) {
+                cardBudgetLeft.innerText   = remainingBudget;
+                cardBudgetLeft.className   = 'text-sm font-bold font-orbitron text-emerald-400 block';
+                deficitLabel.innerText     = 'DEFICIT REMAIN';
+                deficitLabel.className     = 'text-[8px] font-mono text-slate-400 block tracking-wider mb-1 uppercase';
+                deficitUnit.innerText      = 'KCAL LEFT';
+                deficitUnit.className      = 'text-[8px] font-mono text-slate-500 block uppercase';
+            } else {
+                cardBudgetLeft.innerText   = Math.abs(remainingBudget);
+                cardBudgetLeft.className   = 'text-sm font-bold font-orbitron text-rose-500 block';
+                deficitLabel.innerText     = 'SURPLUS OVER';
+                deficitLabel.className     = 'text-[8px] font-mono text-rose-400/80 block tracking-wider mb-1 uppercase';
+                deficitUnit.innerText      = 'KCAL OVER';
+                deficitUnit.className      = 'text-[8px] font-mono text-rose-500 block uppercase font-bold';
+            }
+
+            // Card meal feed
+            const cardMealFeed  = document.getElementById('cardMealFeed');
+            const cardMealsCount= document.getElementById('cardMealsCount');
+            cardMealsCount.innerText = `${loggedMeals.length} ACTIVE LOGS`;
+            if (loggedMeals.length === 0) {
+                cardMealFeed.innerHTML = `<div class="text-slate-600 italic">> NO LOCAL MEALS SYNCHRONIZED...</div>`;
+            } else {
+                cardMealFeed.innerHTML = loggedMeals.slice(-3).map(meal => `
+                    <div class="flex justify-between border-b border-slate-900/40 pb-0.5">
+                        <span class="text-slate-400 font-mono tracking-wide">> ${meal.name}</span>
+                        <span class="text-emerald-400/90 font-mono">+${meal.cals} KCAL</span>
+                    </div>`).join('');
+            }
+
+            // Gauge rings
+            const weightMaxVal  = unitSystem === 'metric' ? 200 : 440;
+            const weightOffset  = 276 - (276 * Math.min(1, weight / weightMaxVal));
+            weightRing.style.strokeDashoffset = Math.max(0, Math.min(276, weightOffset));
+
+            const fatOffset = 276 - (276 * Math.min(1, fat / 50));
+            fatRing.style.strokeDashoffset = Math.max(0, Math.min(276, fatOffset));
+        }
+
+        // ─── ASPECT / THEME ───────────────────────────────────────────────────────
+
+        function changeAspect(ratio) {
+            currentAspect = ratio;
+            const card      = document.getElementById('shareCard');
+            const btn11     = document.getElementById('btnRatio11');
+            const btn916    = document.getElementById('btnRatio916');
+            const activeClass  = 'py-2 px-3 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono text-xs text-center flex items-center justify-center gap-2';
+            const inactiveClass= 'py-2 px-3 rounded bg-slate-900 text-slate-500 border border-slate-800 hover:text-slate-300 font-mono text-xs text-center flex items-center justify-center gap-2';
+
+            if (ratio === '1:1') {
+                card.style.width  = '480px';
+                card.style.height = '480px';
+                btn11.className   = activeClass;
+                btn916.className  = inactiveClass;
+            } else {
+                card.style.width  = '380px';
+                card.style.height = '675px';
+                btn916.className  = activeClass;
+                btn11.className   = inactiveClass;
+            }
+            saveToLocalStorage();
+        }
+
+        const themes = {
+            cyberpunk: {
+                border: 'rgba(6, 182, 212, 0.25)',
+                weightRingColor: '#22d3ee',
+                fatRingColor: '#ec4899',
+                dotColor: '#22d3ee',
+                sysText: 'SPECTRUM: CYBERPUNK',
+                scanColor: 'from-transparent via-cyan-400 to-transparent'
+            },
+            quantum: {
+                border: 'rgba(34, 197, 94, 0.25)',
+                weightRingColor: '#4ade80',
+                fatRingColor: '#14b8a6',
+                dotColor: '#10b981',
+                sysText: 'SPECTRUM: QUANTUM_MINT',
+                scanColor: 'from-transparent via-emerald-400 to-transparent'
+            },
+            solar: {
+                border: 'rgba(245, 158, 11, 0.25)',
+                weightRingColor: '#f59e0b',
+                fatRingColor: '#f43f5e',
+                dotColor: '#f59e0b',
+                sysText: 'SPECTRUM: SOLAR_FLARE',
+                scanColor: 'from-transparent via-amber-500 to-transparent'
+            }
+        };
+
+        function setTheme(key) {
+            currentTheme = key;
+            const theme       = themes[key];
+            const card        = document.getElementById('shareCard');
+            const themeDot    = document.getElementById('themeDot');
+            const sysThemeText= document.getElementById('sysThemeText');
+            const scanningBar = document.getElementById('scanningBar');
+
+            card.style.borderColor   = theme.border;
+            themeDot.style.backgroundColor = theme.dotColor;
+            weightRing.style.color   = theme.weightRingColor;
+            fatRing.style.color      = theme.fatRingColor;
+            sysThemeText.innerText   = theme.sysText;
+            scanningBar.className    = `scanning-bar absolute left-0 right-0 h-[2px] bg-gradient-to-r ${theme.scanColor} z-20 pointer-events-none`;
+
+            saveToLocalStorage();
+        }
+
+        // ─── MISC ACTIONS ─────────────────────────────────────────────────────────
+
+        function triggerHologramScan() {
+            showToast("<i class='fa-solid fa-sync animate-spin mr-2'></i> INITIATING HOLO-SCAN MATRIX SYNC...");
+            const card = document.getElementById('shareCard');
+            card.style.opacity = '0.5';
+            setTimeout(() => {
+                card.style.opacity = '1';
+                showToast("<i class='fa-solid fa-circle-check mr-2 text-emerald-400'></i> METRICS SUCCESSFULLY SYNCED TO HUD ENGINE");
+            }, 800);
+        }
+
+        function showToast(msg) {
+            const toast    = document.getElementById('toastNotification');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.innerHTML = msg;
+            toast.style.opacity = '1';
+            toast.style.pointerEvents = 'auto';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.pointerEvents = 'none';
+            }, 4500);
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('toastNotification');
+            toast.style.opacity = '0';
+            toast.style.pointerEvents = 'none';
+        }
+
+        function formatSysDate() {
+            const d   = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            return `SYNC: ${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())}_${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+
+        function exportCard() {
+            showToast("<i class='fa-solid fa-spinner animate-spin mr-2'></i> INTERPOLATING HI-RES MATRIX ASSETS...");
+            const card = document.getElementById('shareCard');
+            html2canvas(card, {
+                backgroundColor: '#05080e',
+                scale: 2.5,
+                logging: false,
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                const image = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+                const link  = document.createElement('a');
+                const date  = new Date().toISOString().slice(0,10);
+                link.download = `AURA_SYNC_${subjectNameInput.value.toUpperCase() || 'AGENT'}_${date}.png`;
+                link.href = image;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showToast("<i class='fa-solid fa-check text-emerald-400 mr-2'></i> IMAGE DOWNLOAD COMPLETE. SYSTEM READY.");
+            }).catch(err => {
+                console.error(err);
+                showToast("<i class='fa-solid fa-triangle-exclamation text-rose-500 mr-2'></i> SYSTEM ERROR: INTERPOLATION FAILED.");
+            });
+        }
+
+        // ─── BOOT ─────────────────────────────────────────────────────────────────
+
+        window.onload = function () {
+            const restored = loadFromLocalStorage();
+            updateStats();
+
+            // Apply theme if not loaded from storage
+            if (!restored) {
+                setTheme('cyberpunk');
+                changeAspect('1:1');
+            }
+
+            if (restored) {
+                showToast("<i class='fa-solid fa-database text-cyan-400 mr-2'></i> PREVIOUS SESSION RESTORED FROM LOCAL STORAGE.");
+            }
+        };
+    </script>
+</body>
+</html>
