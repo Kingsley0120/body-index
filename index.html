@@ -354,8 +354,8 @@
 
             <div id="exportContainer" class="p-4 bg-[#05080e] rounded-3xl border border-slate-950 flex items-center justify-center shadow-2xl relative overflow-hidden">
                 
-                <div id="shareCard" class="relative overflow-hidden flex flex-col justify-between font-sans grid-bg select-none transition-all duration-500 ease-in-out border-2" 
-                     style="width: 480px; height: 480px; background-color: #060a12; border-color: rgba(6, 182, 212, 0.25);">
+                <div id="shareCard" class="relative overflow-hidden flex flex-col font-sans grid-bg select-none transition-all duration-500 ease-in-out border-2" 
+                     style="width: 480px; min-height: 480px; background-color: #060a12; border-color: rgba(6, 182, 212, 0.25);">
                     
                     <div id="scanningBar" class="scanning-bar absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent z-20 pointer-events-none" style="top: 0;"></div>
                     <div class="absolute inset-0 scanline pointer-events-none opacity-[0.15] z-10"></div>
@@ -382,7 +382,7 @@
                     </div>
 
                     <!-- MIDDLE SECTION: GAUGES -->
-                    <div class="px-6 flex items-center justify-around gap-4 relative z-10 flex-1">
+                    <div class="px-6 py-4 flex items-center justify-around gap-4 relative z-10">
                         
                         <!-- Weight Gauge -->
                         <div class="relative flex flex-col items-center justify-center">
@@ -469,11 +469,11 @@
 
                         <!-- Meal Feed -->
                         <div class="mt-4 bg-slate-950/60 border border-slate-900 p-2.5 rounded-lg">
-                            <div class="flex items-center justify-between text-[8px] font-mono text-slate-500 mb-1">
+                            <div class="flex items-center justify-between text-[8px] font-mono text-slate-500 mb-1.5">
                                 <span class="text-cyan-400/80"><i class="fa-solid fa-server mr-1"></i> MEALS_TELEMETRY_FEED:</span>
                                 <span id="cardMealsCount">0 ACTIVE LOGS</span>
                             </div>
-                            <div id="cardMealFeed" class="text-[9px] font-mono text-slate-400 space-y-0.5 max-h-[44px] overflow-hidden">
+                            <div id="cardMealFeed" class="text-[9px] font-mono text-slate-400 space-y-1 max-h-[120px] overflow-y-auto pr-0.5">
                                 <div class="text-slate-600 italic">> NO LOCAL MEALS SYNCHRONIZED...</div>
                             </div>
                         </div>
@@ -833,10 +833,10 @@
             if (loggedMeals.length === 0) {
                 cardMealFeed.innerHTML = `<div class="text-slate-600 italic">> NO LOCAL MEALS SYNCHRONIZED...</div>`;
             } else {
-                cardMealFeed.innerHTML = loggedMeals.slice(-3).map(meal => `
+                cardMealFeed.innerHTML = loggedMeals.map(meal => `
                     <div class="flex justify-between border-b border-slate-900/40 pb-0.5">
-                        <span class="text-slate-400 font-mono tracking-wide">> ${meal.name}</span>
-                        <span class="text-emerald-400/90 font-mono">+${meal.cals} KCAL</span>
+                        <span class="text-slate-400 font-mono tracking-wide truncate mr-2">> ${meal.name}</span>
+                        <span class="text-emerald-400/90 font-mono shrink-0">+${meal.cals} KCAL</span>
                     </div>`).join('');
             }
 
@@ -860,13 +860,15 @@
             const inactiveClass= 'py-2 px-3 rounded bg-slate-900 text-slate-500 border border-slate-800 hover:text-slate-300 font-mono text-xs text-center flex items-center justify-center gap-2';
 
             if (ratio === '1:1') {
-                card.style.width  = '480px';
-                card.style.height = '480px';
+                card.style.width     = '480px';
+                card.style.minHeight = '480px';
+                card.style.height    = 'auto';
                 btn11.className   = activeClass;
                 btn916.className  = inactiveClass;
             } else {
-                card.style.width  = '380px';
-                card.style.height = '675px';
+                card.style.width     = '380px';
+                card.style.minHeight = '675px';
+                card.style.height    = 'auto';
                 btn916.className  = activeClass;
                 btn11.className   = inactiveClass;
             }
