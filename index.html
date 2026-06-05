@@ -1212,11 +1212,15 @@ function commitPhotoAction() {
 
 async function scanPhotoCalories() {
   if (!photoBase64) return;
+
+  const endpoint = getApiEndpoint();
   document.getElementById('btnScanPhoto').disabled   = true;
   document.getElementById('btnLogDetected').disabled = true;
   document.getElementById('aiResultPanel').classList.add('hidden');
   document.getElementById('photoStatusBar').classList.remove('hidden');
   document.getElementById('photoScanOverlay').classList.remove('hidden');
+
+  const sEl = document.getElementById('photoStatusText');
   const msgs = [
     "<i class='fa-solid fa-circle-notch animate-spin mr-2'></i> UPLOADING FOOD SIGNATURE...",
     "<i class='fa-solid fa-circle-notch animate-spin mr-2'></i> RUNNING NEURAL FOOD RECOGNITION...",
@@ -1224,51 +1228,130 @@ async function scanPhotoCalories() {
     "<i class='fa-solid fa-circle-notch animate-spin mr-2'></i> CROSS-REFERENCING CALORIC DATABASE...",
   ];
   let mi = 0;
-  const sEl = document.getElementById('photoStatusText');
   sEl.innerHTML = msgs[0];
   const iv = setInterval(()=>{ mi=(mi+1)%msgs.length; sEl.innerHTML=msgs[mi]; }, 1300);
-  try {
-    const resp = await fetch(getApiEndpoint(), {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({
-        model:"claude-sonnet-4-20250514", max_tokens:1000,
-        system:`You are a nutritionist AI. Respond ONLY with a single JSON object, no markdown or prose.
-Required fields: { "food_name":"ALL CAPS max 5 words", "calories":<int>, "protein":<int>, "carbs":<int>, "fat":<int>, "fiber":<int>, "confidence":"HIGH"|"MEDIUM"|"LOW", "serving_note":"brief serving assumption", "breakdown":"max 120 chars on key ingredients" }
-Verify: calories ≈ protein*4 + carbs*4 + fat*9. If unidentifiable: all zeros, confidence LOW.`,
-        messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:photoMimeType,data:photoBase64}},{type:"text",text:"Analyze this food image."}]}]
-      })
-    });
+
+  // Helper: show a detailed error box inside the modal (not just toast)
+  function showScanError(title, detail, rawText) {
     clearInterval(iv);
-    if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e?.error?.message||`API ${resp.status}`); }
-    const data = await resp.json();
-    const raw  = data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
-    aiResult   = JSON.parse(raw.replace(/```json|```/gi,'').trim());
-    document.getElementById('aiDetectedFood').textContent  = aiResult.food_name||'FOOD';
-    document.getElementById('aiServingNote').textContent   = aiResult.serving_note||'';
-    document.getElementById('aiDetectedCals').textContent  = Math.max(0,parseInt(aiResult.calories)||0);
-    document.getElementById('aiProtein').textContent       = Math.max(0,parseInt(aiResult.protein)||0);
-    document.getElementById('aiCarbs').textContent         = Math.max(0,parseInt(aiResult.carbs)||0);
-    document.getElementById('aiFat').textContent           = Math.max(0,parseInt(aiResult.fat)||0);
-    document.getElementById('aiFiber').textContent         = Math.max(0,parseInt(aiResult.fiber)||0);
-    document.getElementById('aiBreakdownNote').textContent = aiResult.breakdown||'';
-    document.getElementById('aiCalOverride').value         = Math.max(0,parseInt(aiResult.calories)||0);
-    const conf = aiResult.confidence||'MEDIUM';
+    document.getElementById('photoScanOverlay').classList.add('hidden');
+    document.getElementById('photoStatusBar').classList.add('hidden');
+    document.getElementById('btnScanPhoto').disabled = false;
+
+    // Build an error panel inline so user can read it without it disappearing
+    let panel = document.getElementById('scanErrorPanel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'scanErrorPanel';
+      document.getElementById('aiResultPanel').parentNode.insertBefore(panel, document.getElementById('aiResultPanel'));
+    }
+    panel.className = 'bg-rose-950/40 border border-rose-500/30 rounded-xl p-3 space-y-1.5';
+    panel.innerHTML = `
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
+        <span class="text-xs font-orbitron font-bold text-rose-400 tracking-wider">SCAN FAILED</span>
+      </div>
+      <p class="text-[10px] font-mono text-rose-300">${title}</p>
+      ${detail ? `<p class="text-[10px] font-mono text-slate-400 break-all">${detail}</p>` : ''}
+      <div class="text-[9px] font-mono text-slate-500 bg-slate-950/60 rounded p-2 break-all">
+        <span class="text-slate-600">ENDPOINT: </span>${endpoint}
+      </div>
+      ${rawText ? `<details class="text-[9px] font-mono text-slate-500"><summary class="cursor-pointer text-slate-400 hover:text-white">RAW RESPONSE ▸</summary><pre class="mt-1 bg-slate-950/60 rounded p-2 overflow-x-auto whitespace-pre-wrap break-all max-h-32">${rawText.slice(0,800)}</pre></details>` : ''}
+      <p class="text-[9px] font-mono text-slate-600">If endpoint shows api.anthropic.com — your proxy URL is not saved. Click AI PROXY in the header to configure it.</p>
+    `;
+    panel.classList.remove('hidden');
+  }
+
+  try {
+    let resp;
+    try {
+      resp = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: 'You are a nutritionist AI. Respond ONLY with a single JSON object, no markdown or prose.
+Required fields: { "food_name":"ALL CAPS max 5 words", "calories":<int>, "protein":<int>, "carbs":<int>, "fat":<int>, "fiber":<int>, "confidence":"HIGH"|"MEDIUM"|"LOW", "serving_note":"brief serving assumption", "breakdown":"max 120 chars on key ingredients" }
+Verify: calories ≈ protein*4 + carbs*4 + fat*9. If unidentifiable: all zeros, confidence LOW.',
+          messages: [{ role: 'user', content: [
+            { type: 'image', source: { type: 'base64', media_type: photoMimeType, data: photoBase64 } },
+            { type: 'text',  text: 'Analyze this food image.' }
+          ]}]
+        })
+      });
+    } catch(networkErr) {
+      // Network / CORS error — fetch itself threw
+      showScanError(
+        'NETWORK ERROR — request could not be sent.',
+        String(networkErr.message),
+        null
+      );
+      return;
+    }
+
+    const rawText = await resp.text();
+    clearInterval(iv);
+
+    if (!resp.ok) {
+      let apiMsg = rawText;
+      try { apiMsg = JSON.parse(rawText)?.error?.message || rawText; } catch(e) {}
+      showScanError(
+        `HTTP ${resp.status} — server returned an error.`,
+        apiMsg.slice(0, 200),
+        rawText
+      );
+      return;
+    }
+
+    let data;
+    try {
+      data = JSON.parse(rawText);
+    } catch(e) {
+      showScanError('INVALID JSON from server.', e.message, rawText);
+      return;
+    }
+
+    const raw = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+    let parsed;
+    try {
+      parsed = JSON.parse(raw.replace(/```json|```/gi, '').trim());
+    } catch(e) {
+      showScanError('AI did not return valid JSON.', e.message, raw);
+      return;
+    }
+    aiResult = parsed;
+
+    // Clear any previous error panel
+    const errPanel = document.getElementById('scanErrorPanel');
+    if (errPanel) errPanel.classList.add('hidden');
+
+    document.getElementById('aiDetectedFood').textContent  = aiResult.food_name || 'FOOD';
+    document.getElementById('aiServingNote').textContent   = aiResult.serving_note || '';
+    document.getElementById('aiDetectedCals').textContent  = Math.max(0, parseInt(aiResult.calories) || 0);
+    document.getElementById('aiProtein').textContent       = Math.max(0, parseInt(aiResult.protein) || 0);
+    document.getElementById('aiCarbs').textContent         = Math.max(0, parseInt(aiResult.carbs) || 0);
+    document.getElementById('aiFat').textContent           = Math.max(0, parseInt(aiResult.fat) || 0);
+    document.getElementById('aiFiber').textContent         = Math.max(0, parseInt(aiResult.fiber) || 0);
+    document.getElementById('aiBreakdownNote').textContent = aiResult.breakdown || '';
+    document.getElementById('aiCalOverride').value         = Math.max(0, parseInt(aiResult.calories) || 0);
+
+    const conf  = aiResult.confidence || 'MEDIUM';
     const badge = document.getElementById('aiConfidenceBadge');
     badge.textContent = `CONF: ${conf}`;
-    badge.className = `text-[9px] font-mono px-2 py-0.5 rounded border ${conf==='HIGH'?'bg-emerald-950/50 border-emerald-500/30 text-emerald-300':conf==='LOW'?'bg-rose-950/50 border-rose-500/30 text-rose-300':'bg-amber-950/50 border-amber-500/30 text-amber-300'}`;
+    badge.className   = `text-[9px] font-mono px-2 py-0.5 rounded border ${conf==='HIGH'?'bg-emerald-950/50 border-emerald-500/30 text-emerald-300':conf==='LOW'?'bg-rose-950/50 border-rose-500/30 text-rose-300':'bg-amber-950/50 border-amber-500/30 text-amber-300'}`;
+
     if (!document.getElementById('photoMealNameOverride').value.trim())
-      document.getElementById('photoMealNameOverride').value = aiResult.food_name||'';
+      document.getElementById('photoMealNameOverride').value = aiResult.food_name || '';
+
     document.getElementById('photoScanOverlay').classList.add('hidden');
     document.getElementById('photoStatusBar').classList.add('hidden');
     document.getElementById('aiResultPanel').classList.remove('hidden');
     document.getElementById('btnLogDetected').disabled = false;
     document.getElementById('btnScanPhoto').disabled   = false;
+
   } catch(err) {
-    clearInterval(iv);
-    document.getElementById('photoScanOverlay').classList.add('hidden');
-    document.getElementById('photoStatusBar').classList.add('hidden');
-    document.getElementById('btnScanPhoto').disabled = false;
-    showToast(`<i class='fa-solid fa-triangle-exclamation text-rose-500 mr-2'></i> SCAN FAILED: ${String(err.message).slice(0,60)}`);
+    showScanError('UNEXPECTED ERROR.', String(err.message), null);
   }
 }
 
@@ -1452,24 +1535,49 @@ async function testAndSaveProxy() {
     return;
   }
 
-  // Send a minimal test payload (invalid, but enough to check CORS + reachability)
   try {
+    // Real test: tiny API call through the proxy to verify key + CORS both work
     const resp = await fetch(val + '/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1, messages: [{ role: 'user', content: 'hi' }] }),
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 5,
+        messages: [{ role: 'user', content: 'hi' }]
+      }),
     });
-    // Any response (even 400/500) means the proxy is reachable and CORS is working
-    PROXY_URL = val;
-    localStorage.setItem('aura_proxy_url', val);
-    document.getElementById('currentProxyDisplay').textContent = val;
-    resultEl.className = 'text-[10px] font-mono mt-1.5 text-emerald-400';
-    resultEl.innerHTML = `<i class='fa-solid fa-check mr-1'></i> CONNECTED (HTTP ${resp.status}) — PROXY SAVED`;
-    document.getElementById('proxyBanner').classList.add('hidden');
-    updateProxyBtn();
+    const rawText = await resp.text();
+    let detail = '';
+    try {
+      const j = JSON.parse(rawText);
+      if (j?.error?.message) detail = ' — ' + j.error.message.slice(0, 100);
+    } catch(e) { detail = ' — ' + rawText.slice(0, 100); }
+
+    if (resp.ok || resp.status === 200) {
+      // Success
+      PROXY_URL = val;
+      localStorage.setItem('aura_proxy_url', val);
+      document.getElementById('currentProxyDisplay').textContent = val;
+      resultEl.className = 'text-[10px] font-mono mt-1.5 text-emerald-400';
+      resultEl.innerHTML = `<i class='fa-solid fa-check mr-1'></i> PROXY WORKING — API KEY VALID. SAVED.`;
+      document.getElementById('proxyBanner').classList.add('hidden');
+      updateProxyBtn();
+    } else if (resp.status === 401) {
+      resultEl.className = 'text-[10px] font-mono mt-1.5 text-rose-400';
+      resultEl.innerHTML = `<i class='fa-solid fa-xmark mr-1'></i> HTTP 401 — ANTHROPIC_API_KEY secret is wrong or missing on the Worker. Check Cloudflare → Worker → Settings → Variables & Secrets.`;
+    } else if (resp.status === 404) {
+      resultEl.className = 'text-[10px] font-mono mt-1.5 text-rose-400';
+      resultEl.innerHTML = `<i class='fa-solid fa-xmark mr-1'></i> HTTP 404 — Worker URL may be wrong, or the worker code was not deployed correctly.`;
+    } else {
+      resultEl.className = 'text-[10px] font-mono mt-1.5 text-amber-400';
+      resultEl.innerHTML = `<i class='fa-solid fa-triangle-exclamation mr-1'></i> HTTP ${resp.status}${detail}`;
+    }
   } catch(e) {
     resultEl.className = 'text-[10px] font-mono mt-1.5 text-rose-400';
-    resultEl.innerHTML = `<i class='fa-solid fa-xmark mr-1'></i> FAILED: ${String(e.message).slice(0, 80)}`;
+    const isCors = String(e.message).toLowerCase().includes('cors') || String(e.message).includes('Failed to fetch');
+    resultEl.innerHTML = isCors
+      ? `<i class='fa-solid fa-xmark mr-1'></i> CORS ERROR — Worker may not have CORS headers. Redeploy the cloudflare-worker.js file.`
+      : `<i class='fa-solid fa-xmark mr-1'></i> NETWORK ERROR: ${String(e.message).slice(0, 120)}`;
   }
 }
 
