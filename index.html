@@ -155,6 +155,81 @@
 </div>
 
 <!-- ════════════════════════════════════════════
+     PROXY SETUP BANNER
+════════════════════════════════════════════ -->
+<div id="proxyBanner" class="hidden relative z-20 bg-amber-950/90 border-b border-amber-500/40 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2">
+    <div class="flex items-center gap-2 text-xs font-mono text-amber-200">
+      <i class="fa-solid fa-triangle-exclamation text-amber-400 shrink-0"></i>
+      <span><strong class="text-amber-300">AI SCANNER DISABLED</strong> — Direct API calls are blocked by CORS on static hosts (GitHub Pages, etc). Deploy the Cloudflare Worker proxy to enable it.</span>
+    </div>
+    <div class="flex items-center gap-2 shrink-0">
+      <button onclick="openProxySetup()" class="text-[10px] font-mono bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 px-3 py-1 rounded-lg transition-all whitespace-nowrap"><i class="fa-solid fa-wrench mr-1"></i> SETUP PROXY</button>
+      <button onclick="document.getElementById('proxyBanner').classList.add('hidden')" class="text-amber-400/60 hover:text-amber-300 text-sm"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PROXY SETUP MODAL
+════════════════════════════════════════════ -->
+<div id="proxySetupModal" class="modal-base fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+  <div class="bg-[#070c14] border border-amber-500/30 rounded-2xl w-full max-w-lg shadow-2xl relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-8 h-[1px] bg-amber-500"></div>
+    <div class="absolute top-0 left-0 w-[1px] h-8 bg-amber-500"></div>
+    <div class="absolute bottom-0 right-0 w-8 h-[1px] bg-fuchsia-500"></div>
+    <div class="absolute bottom-0 right-0 w-[1px] h-8 bg-fuchsia-500"></div>
+
+    <div class="px-5 pt-5 pb-3 border-b border-slate-800 flex items-center justify-between">
+      <div>
+        <h3 class="text-sm font-orbitron font-bold text-amber-400 tracking-widest"><i class="fa-solid fa-wrench mr-2"></i>PROXY SETUP</h3>
+        <p class="text-[10px] font-mono text-slate-500 mt-0.5">REQUIRED FOR AI SCANNER ON STATIC HOSTS</p>
+      </div>
+      <button onclick="closeProxySetup()" class="text-slate-500 hover:text-white transition-colors text-lg"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="p-5 space-y-4">
+      <!-- Step by step guide -->
+      <div class="space-y-2">
+        <p class="text-[10px] font-mono text-amber-400/80 tracking-wider uppercase">WHY THIS IS NEEDED</p>
+        <p class="text-xs font-mono text-slate-400 leading-relaxed">Browsers block direct calls to <code class="text-cyan-400 bg-slate-900 px-1 rounded">api.anthropic.com</code> from pages on GitHub Pages, Netlify, etc. due to CORS policy. A small proxy worker sits in between and adds the required headers.</p>
+      </div>
+
+      <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-3">
+        <p class="text-[10px] font-mono text-cyan-400 tracking-wider uppercase"><i class="fa-solid fa-list-ol mr-1"></i> CLOUDFLARE WORKER SETUP (FREE · 3 MIN)</p>
+        <ol class="space-y-2 text-xs font-mono text-slate-300">
+          <li class="flex gap-2"><span class="text-cyan-400 shrink-0 font-bold">1.</span><span>Go to <a href="https://workers.cloudflare.com" target="_blank" class="text-cyan-400 underline">workers.cloudflare.com</a> → sign up free</span></li>
+          <li class="flex gap-2"><span class="text-cyan-400 shrink-0 font-bold">2.</span><span>Click <strong>Create Worker</strong> → paste the contents of <code class="text-amber-300 bg-slate-950 px-1 rounded">cloudflare-worker.js</code> → Deploy</span></li>
+          <li class="flex gap-2"><span class="text-cyan-400 shrink-0 font-bold">3.</span><span>In Worker Settings → <strong>Variables &amp; Secrets</strong> → add Secret:<br><code class="text-amber-300 bg-slate-950 px-1 rounded">ANTHROPIC_API_KEY</code> = your key from <a href="https://console.anthropic.com" target="_blank" class="text-cyan-400 underline">console.anthropic.com</a></span></li>
+          <li class="flex gap-2"><span class="text-cyan-400 shrink-0 font-bold">4.</span><span>Copy your worker URL (e.g. <code class="text-emerald-400 bg-slate-950 px-1 rounded">https://aura-proxy.your-name.workers.dev</code>) and paste below</span></li>
+        </ol>
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-mono text-slate-300 mb-1.5">YOUR WORKER URL</label>
+        <div class="flex gap-2">
+          <input type="url" id="proxyUrlInput" placeholder="https://aura-proxy.YOUR-NAME.workers.dev"
+                 class="flex-1 bg-slate-900 border border-slate-800 focus:border-amber-500/80 text-amber-300 font-mono text-xs rounded-lg px-3 py-2.5 focus:outline-none transition-all"/>
+          <button onclick="testAndSaveProxy()" class="bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 font-mono text-xs px-4 py-2.5 rounded-lg transition-all whitespace-nowrap"><i class="fa-solid fa-plug mr-1"></i> TEST &amp; SAVE</button>
+        </div>
+        <p id="proxyTestResult" class="text-[10px] font-mono mt-1.5 hidden"></p>
+      </div>
+
+      <!-- Current status -->
+      <div class="flex items-center justify-between bg-slate-900/40 border border-slate-800 rounded-lg px-3 py-2">
+        <span class="text-[10px] font-mono text-slate-500">CURRENT PROXY:</span>
+        <span id="currentProxyDisplay" class="text-[10px] font-mono text-slate-400">NOT SET</span>
+      </div>
+
+      <div class="flex gap-2 pt-1">
+        <button onclick="clearProxy()" class="flex-1 bg-slate-900 hover:bg-rose-950/30 border border-slate-800 hover:border-rose-500/30 text-slate-500 hover:text-rose-400 font-mono text-xs py-2.5 rounded-lg transition-all"><i class="fa-solid fa-trash mr-1"></i> CLEAR</button>
+        <button onclick="closeProxySetup()" class="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-300 font-mono text-xs py-2.5 rounded-lg transition-all font-bold"><i class="fa-solid fa-check mr-1"></i> DONE</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
      HEADER
 ════════════════════════════════════════════ -->
 <header class="relative z-10 border-b border-cyan-950/60 bg-slate-950/60 backdrop-blur-md">
@@ -184,6 +259,7 @@
       </div>
       <button onclick="openHistoryModal()" class="text-xs font-mono border border-violet-500/30 hover:border-violet-400/60 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 px-3 py-1.5 rounded-lg transition-all"><i class="fa-solid fa-clock-rotate-left mr-1"></i> HISTORY</button>
       <button onclick="saveCurrentDay(true)" class="text-xs font-mono border border-cyan-500/20 hover:border-cyan-400/80 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 px-3 py-1.5 rounded-lg transition-all"><i class="fa-solid fa-floppy-disk mr-1"></i> SAVE</button>
+      <button onclick="openProxySetup()" id="btnProxySettings" class="text-xs font-mono border border-amber-500/20 hover:border-amber-400/60 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 px-3 py-1.5 rounded-lg transition-all" title="AI Scanner Proxy Settings"><i class="fa-solid fa-plug mr-1"></i> <span id="proxyBtnLabel">AI PROXY</span></button>
     </div>
   </div>
 </header>
@@ -378,6 +454,19 @@
 // ═══════════════ CONSTANTS ═══════════════
 const GLOBAL_KEY = 'aura_v4_global';  // settings, streak
 const DAY_PREFIX  = 'aura_v4_day_';   // + YYYY-MM-DD
+
+// ── PROXY CONFIG ──────────────────────────────────────────────
+// Direct calls to api.anthropic.com are blocked by CORS on
+// GitHub Pages and other static hosts. Set PROXY_URL to your
+// Cloudflare Worker URL, e.g.:
+//   'https://aura-proxy.YOUR-NAME.workers.dev'
+// Leave empty ('') to use direct call (works in claude.ai only).
+let PROXY_URL = localStorage.getItem('aura_proxy_url') || '';
+
+function getApiEndpoint() {
+  const base = PROXY_URL ? PROXY_URL.replace(/\/$/, '') : 'https://api.anthropic.com';
+  return base + '/v1/messages';
+}
 
 // ═══════════════ STATE ═══════════════
 let unitSystem    = 'metric';
@@ -1139,7 +1228,7 @@ async function scanPhotoCalories() {
   sEl.innerHTML = msgs[0];
   const iv = setInterval(()=>{ mi=(mi+1)%msgs.length; sEl.innerHTML=msgs[mi]; }, 1300);
   try {
-    const resp = await fetch("https://api.anthropic.com/v1/messages",{
+    const resp = await fetch(getApiEndpoint(), {
       method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({
         model:"claude-sonnet-4-20250514", max_tokens:1000,
@@ -1322,8 +1411,87 @@ function hideToast() {
   t.style.opacity='0'; t.style.pointerEvents='none';
 }
 
+// ═══════════════ PROXY SETUP ═══════════════
+function openProxySetup() {
+  const input = document.getElementById('proxyUrlInput');
+  const display = document.getElementById('currentProxyDisplay');
+  if (PROXY_URL) { input.value = PROXY_URL; display.textContent = PROXY_URL; }
+  else { input.value = ''; display.textContent = 'NOT SET'; }
+  document.getElementById('proxyTestResult').classList.add('hidden');
+  document.getElementById('proxySetupModal').classList.add('open');
+}
+
+function updateProxyBtn() {
+  const btn = document.getElementById('proxyBtnLabel');
+  if (!btn) return;
+  if (PROXY_URL) {
+    btn.textContent = 'AI PROXY ✓';
+    document.getElementById('btnProxySettings').classList.remove('border-amber-500/20','text-amber-400','bg-amber-500/10');
+    document.getElementById('btnProxySettings').classList.add('border-emerald-500/30','text-emerald-400','bg-emerald-500/10');
+  } else {
+    btn.textContent = 'AI PROXY';
+    document.getElementById('btnProxySettings').classList.add('border-amber-500/20','text-amber-400','bg-amber-500/10');
+    document.getElementById('btnProxySettings').classList.remove('border-emerald-500/30','text-emerald-400','bg-emerald-500/10');
+  }
+}
+
+function closeProxySetup() {
+  document.getElementById('proxySetupModal').classList.remove('open');
+}
+
+async function testAndSaveProxy() {
+  const val = document.getElementById('proxyUrlInput').value.trim().replace(/\/$/, '');
+  const resultEl = document.getElementById('proxyTestResult');
+  resultEl.classList.remove('hidden');
+  resultEl.className = 'text-[10px] font-mono mt-1.5 text-cyan-400/80';
+  resultEl.innerHTML = "<i class='fa-solid fa-circle-notch animate-spin mr-1'></i> TESTING CONNECTION...";
+
+  if (!val) {
+    resultEl.className = 'text-[10px] font-mono mt-1.5 text-rose-400';
+    resultEl.innerHTML = "<i class='fa-solid fa-xmark mr-1'></i> URL IS EMPTY";
+    return;
+  }
+
+  // Send a minimal test payload (invalid, but enough to check CORS + reachability)
+  try {
+    const resp = await fetch(val + '/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1, messages: [{ role: 'user', content: 'hi' }] }),
+    });
+    // Any response (even 400/500) means the proxy is reachable and CORS is working
+    PROXY_URL = val;
+    localStorage.setItem('aura_proxy_url', val);
+    document.getElementById('currentProxyDisplay').textContent = val;
+    resultEl.className = 'text-[10px] font-mono mt-1.5 text-emerald-400';
+    resultEl.innerHTML = `<i class='fa-solid fa-check mr-1'></i> CONNECTED (HTTP ${resp.status}) — PROXY SAVED`;
+    document.getElementById('proxyBanner').classList.add('hidden');
+    updateProxyBtn();
+  } catch(e) {
+    resultEl.className = 'text-[10px] font-mono mt-1.5 text-rose-400';
+    resultEl.innerHTML = `<i class='fa-solid fa-xmark mr-1'></i> FAILED: ${String(e.message).slice(0, 80)}`;
+  }
+}
+
+function clearProxy() {
+  PROXY_URL = '';
+  localStorage.removeItem('aura_proxy_url');
+  document.getElementById('proxyUrlInput').value = '';
+  document.getElementById('currentProxyDisplay').textContent = 'NOT SET';
+  const resultEl = document.getElementById('proxyTestResult');
+  resultEl.className = 'text-[10px] font-mono mt-1.5 text-amber-400';
+  resultEl.classList.remove('hidden');
+  resultEl.innerHTML = "<i class='fa-solid fa-trash mr-1'></i> PROXY CLEARED";
+  updateProxyBtn();
+}
+
 // ═══════════════ BOOT ═══════════════
 window.onload = function() {
+  // Load saved proxy URL
+  const savedProxy = localStorage.getItem('aura_proxy_url');
+  if (savedProxy) PROXY_URL = savedProxy;
+  setTimeout(updateProxyBtn, 50);
+
   loadGlobal();
   applyUnitLabels();
   if (currentTheme)  setTheme(currentTheme);
@@ -1334,8 +1502,23 @@ window.onload = function() {
   loadDay(viewingDate);
   updateStreakDisplay();
   updateDateDisplay();
+
   const hasTodayData = !!localStorage.getItem(DAY_PREFIX + viewingDate);
   if (hasTodayData) showToast("<i class='fa-solid fa-database text-cyan-400 mr-2'></i> TODAY'S SESSION RESTORED.");
+
+  // Show proxy banner on static hosts without a proxy configured
+  const isStaticHost = window.location.protocol === 'https:' &&
+    !window.location.hostname.includes('claude.ai') &&
+    !window.location.hostname.includes('localhost') &&
+    !window.location.hostname.includes('127.0.0.1');
+  if (isStaticHost && !PROXY_URL) {
+    document.getElementById('proxyBanner').classList.remove('hidden');
+  }
+
+  // Close proxy modal on backdrop click
+  document.getElementById('proxySetupModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('proxySetupModal')) closeProxySetup();
+  });
 };
 </script>
 </body>
