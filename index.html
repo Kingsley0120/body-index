@@ -21,19 +21,15 @@
 .bar-fill{transition:width 0.6s cubic-bezier(.4,0,.2,1)}
 .modal-base{transition:opacity .22s ease;opacity:0;pointer-events:none}
 .modal-base.open{opacity:1;pointer-events:auto}
-/* card pages */
 #cardViewport{position:relative;overflow:hidden}
 .card-page{position:absolute;inset:0;transition:transform .4s cubic-bezier(.4,0,.2,1),opacity .4s ease;opacity:0;pointer-events:none}
 .card-page.active{opacity:1;pointer-events:auto;position:relative}
-/* streak flame pulse */
 @keyframes flame{0%,100%{filter:drop-shadow(0 0 4px #f97316)}50%{filter:drop-shadow(0 0 10px #fb923c)}}
 .flame-icon{animation:flame 1.5s ease-in-out infinite}
-/* history day row hover */
 .day-row:hover{background:rgba(6,182,212,0.05)}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:rgba(15,23,42,0.5)}
 ::-webkit-scrollbar-thumb{background:rgba(6,182,212,0.35);border-radius:3px}
-/* food photo on card */
 .meal-photo{width:100%;height:120px;object-fit:cover;border-radius:8px}
 </style>
 </head>
@@ -41,9 +37,7 @@
 <div class="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-cyan-900/10 blur-[120px] pointer-events-none z-0"></div>
 <div class="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-fuchsia-950/15 blur-[120px] pointer-events-none z-0"></div>
 
-<!-- ════════════════════════════════════════════
-     PHOTO / AI SCANNER MODAL
-════════════════════════════════════════════ -->
+<!-- PHOTO / AI SCANNER MODAL -->
 <div id="photoModal" class="modal-base fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
   <div class="bg-[#070c14] border border-cyan-500/30 rounded-2xl w-full max-w-lg relative shadow-2xl my-auto">
     <div class="absolute top-0 left-0 w-8 h-[1px] bg-cyan-500"></div><div class="absolute top-0 left-0 w-[1px] h-8 bg-cyan-500"></div>
@@ -51,12 +45,11 @@
     <div class="px-5 pt-5 pb-3 border-b border-slate-800 flex items-center justify-between">
       <div>
         <h3 class="text-sm font-orbitron font-bold text-cyan-400 tracking-widest flex items-center gap-2"><i class="fa-solid fa-camera-retro animate-pulse"></i> <span id="photoModalTitle">AI FOOD SCANNER</span></h3>
-        <p class="text-[10px] font-mono text-slate-500 mt-0.5" id="photoModalSub">PHOTO → CALORIES + MACROS</p>
+        <p class="text-[10px] font-mono text-slate-500 mt-0.5" id="photoModalSub">PHOTO → CALORIES + MACROS (GEMINI)</p>
       </div>
       <button onclick="closePhotoModal()" class="text-slate-500 hover:text-white transition-colors text-lg"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="p-5 space-y-3">
-      <!-- Drop zone -->
       <div id="photoDropZone" onclick="document.getElementById('photoFileInput').click()"
            class="relative border-2 border-dashed border-slate-700 hover:border-cyan-500/60 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden" style="min-height:150px;">
         <div id="photoEmptyState" class="flex flex-col items-center gap-2 py-5">
@@ -77,7 +70,6 @@
         <button onclick="document.getElementById('photoFileInput').click()" class="py-2 text-xs font-mono border border-slate-700 hover:border-cyan-500/50 text-slate-400 hover:text-cyan-300 rounded-lg transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-folder-open"></i> BROWSE</button>
         <button onclick="triggerCamera()" class="py-2 text-xs font-mono border border-slate-700 hover:border-fuchsia-500/50 text-slate-400 hover:text-fuchsia-300 rounded-lg transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-camera"></i> CAMERA</button>
       </div>
-      <!-- Only shown in "add meal" mode, hidden in "attach photo" mode -->
       <div id="photoNewMealFields">
         <div class="grid grid-cols-4 gap-1.5 mb-2">
           <button onclick="setPhotoCategory('breakfast')" id="photoCatBreakfast" class="py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono text-[9px] text-center transition-all">🌅 BFAST</button>
@@ -88,10 +80,9 @@
         <input type="text" id="photoMealNameOverride" placeholder="Meal label (auto-filled by AI)..."
                class="w-full bg-slate-900 border border-slate-800 focus:border-cyan-500 text-slate-200 font-mono text-xs rounded-lg px-3 py-2 focus:outline-none mb-2"/>
       </div>
-      <!-- AI result -->
       <div id="aiResultPanel" class="hidden bg-slate-900/60 border border-emerald-500/20 rounded-xl p-3 space-y-2">
         <div class="flex items-center justify-between">
-          <span class="text-[10px] font-mono text-emerald-400"><i class="fa-solid fa-microchip mr-1"></i> AI RESULT</span>
+          <span class="text-[10px] font-mono text-emerald-400"><i class="fa-solid fa-microchip mr-1"></i> AI RESULT (GEMINI)</span>
           <span id="aiConfidenceBadge" class="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-950/50 border border-emerald-500/30 text-emerald-300"></span>
         </div>
         <div class="grid grid-cols-2 gap-2">
@@ -134,9 +125,7 @@
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════
-     HISTORY / DAY BROWSER MODAL
-════════════════════════════════════════════ -->
+<!-- HISTORY / DAY BROWSER MODAL -->
 <div id="historyModal" class="modal-base fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
   <div class="bg-[#070c14] border border-violet-500/30 rounded-2xl w-full max-w-xl relative shadow-2xl my-auto">
     <div class="absolute top-0 left-0 w-8 h-[1px] bg-violet-500"></div><div class="absolute top-0 left-0 w-[1px] h-8 bg-violet-500"></div>
@@ -154,25 +143,21 @@
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════
-     PROXY SETUP BANNER
-════════════════════════════════════════════ -->
+<!-- GEMINI API KEY SETUP MODAL -->
 <div id="proxyBanner" class="hidden relative z-20 bg-amber-950/90 border-b border-amber-500/40 backdrop-blur-md">
   <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2">
     <div class="flex items-center gap-2 text-xs font-mono text-amber-200">
       <i class="fa-solid fa-triangle-exclamation text-amber-400 shrink-0"></i>
-      <span><strong class="text-amber-300">AI SCANNER DISABLED</strong> — Direct API calls are blocked by CORS on static hosts (GitHub Pages, etc). Deploy the Cloudflare Worker proxy to enable it.</span>
+      <span><strong class="text-amber-300">AI SCANNER NEEDS SETUP</strong> — Add your Gemini API key to enable food scanning.</span>
     </div>
     <div class="flex items-center gap-2 shrink-0">
-      <button onclick="openProxySetup()" class="text-[10px] font-mono bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 px-3 py-1 rounded-lg transition-all whitespace-nowrap"><i class="fa-solid fa-wrench mr-1"></i> SETUP PROXY</button>
+      <button onclick="openProxySetup()" class="text-[10px] font-mono bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 px-3 py-1 rounded-lg transition-all whitespace-nowrap"><i class="fa-solid fa-key mr-1"></i> ADD KEY</button>
       <button onclick="document.getElementById('proxyBanner').classList.add('hidden')" class="text-amber-400/60 hover:text-amber-300 text-sm"><i class="fa-solid fa-xmark"></i></button>
     </div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════
-     PROXY SETUP MODAL
-════════════════════════════════════════════ -->
+<!-- GEMINI API KEY SETUP MODAL -->
 <div id="proxySetupModal" class="modal-base fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
   <div class="bg-[#070c14] border border-amber-500/30 rounded-2xl w-full max-w-lg shadow-2xl relative overflow-hidden">
     <div class="absolute top-0 left-0 w-8 h-[1px] bg-amber-500"></div>
@@ -182,56 +167,49 @@
 
     <div class="px-5 pt-5 pb-3 border-b border-slate-800 flex items-center justify-between">
       <div>
-        <h3 class="text-sm font-orbitron font-bold text-amber-400 tracking-widest"><i class="fa-solid fa-wrench mr-2"></i>PROXY SETUP</h3>
-        <p class="text-[10px] font-mono text-slate-500 mt-0.5">REQUIRED FOR AI SCANNER ON STATIC HOSTS</p>
+        <h3 class="text-sm font-orbitron font-bold text-amber-400 tracking-widest"><i class="fa-solid fa-key mr-2"></i>GEMINI API KEY</h3>
+        <p class="text-[10px] font-mono text-slate-500 mt-0.5">REQUIRED FOR AI FOOD SCANNER</p>
       </div>
       <button onclick="closeProxySetup()" class="text-slate-500 hover:text-white transition-colors text-lg"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
     <div class="p-5 space-y-4">
-      <!-- Step by step guide -->
       <div class="space-y-2">
-        <p class="text-[10px] font-mono text-amber-400/80 tracking-wider uppercase">WHY THIS IS NEEDED</p>
-        <p class="text-xs font-mono text-slate-400 leading-relaxed">Browsers block direct calls to <code class="text-cyan-400 bg-slate-900 px-1 rounded">api.anthropic.com</code> from pages on GitHub Pages, Netlify, etc. due to CORS policy. A small proxy worker sits in between and adds the required headers.</p>
-      </div>
-
-      <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-3">
-        <p class="text-[10px] font-mono text-cyan-400 tracking-wider uppercase"><i class="fa-solid fa-list-ol mr-1"></i> CLOUDFLARE WORKER SETUP (FREE · 3 MIN)</p>
-        <ol class="space-y-2 text-xs font-mono text-slate-300">
-          <li class="flex gap-2"><span class="text-cyan-400 shrink-0 font-bold">1.</span><span>Go to <a href="https://workers.cloudflare.com" target="_blank" class="text-cyan-400 underline">workers.cloudflare.com</a> → sign up free</span></li>
-          <li class="flex gap-2"><span class="text-cyan-400 shrink-0 font-bold">2.</span><span>Click <strong>Create Worker</strong> → paste the contents of <code class="text-amber-300 bg-slate-950 px-1 rounded">cloudflare-worker.js</code> → Deploy</span></li>
-          <li class="flex gap-2"><span class="text-cyan-400 shrink-0 font-bold">3.</span><span>In Worker Settings → <strong>Variables &amp; Secrets</strong> → add Secret:<br><code class="text-amber-300 bg-slate-950 px-1 rounded">ANTHROPIC_API_KEY</code> = your key from <a href="https://console.anthropic.com" target="_blank" class="text-cyan-400 underline">console.anthropic.com</a></span></li>
-          <li class="flex gap-2"><span class="text-cyan-400 shrink-0 font-bold">4.</span><span>Copy your worker URL (e.g. <code class="text-emerald-400 bg-slate-950 px-1 rounded">https://aura-proxy.your-name.workers.dev</code>) and paste below</span></li>
-        </ol>
+        <p class="text-[10px] font-mono text-amber-400/80 tracking-wider uppercase">HOW TO GET YOUR KEY (FREE)</p>
+        <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-3">
+          <ol class="space-y-2 text-xs font-mono text-slate-300">
+            <li class="flex gap-2"><span class="text-cyan-400 shrink-0 font-bold">1.</span><span>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-cyan-400 underline">aistudio.google.com/app/apikey</a></span></li>
+            <li class="flex gap-2"><span class="text-cyan-400 shrink-0 font-bold">2.</span><span>Sign in with your Google account</span></li>
+            <li class="flex gap-2"><span class="text-cyan-400 shrink-0 font-bold">3.</span><span>Click <strong class="text-amber-300">Create API Key</strong> → copy it</span></li>
+            <li class="flex gap-2"><span class="text-cyan-400 shrink-0 font-bold">4.</span><span>Paste it below. Your key is stored only in your browser's localStorage — never sent anywhere except Google's API.</span></li>
+          </ol>
+        </div>
       </div>
 
       <div>
-        <label class="block text-[10px] font-mono text-slate-300 mb-1.5">YOUR WORKER URL</label>
+        <label class="block text-[10px] font-mono text-slate-300 mb-1.5">YOUR GEMINI API KEY</label>
         <div class="flex gap-2">
-          <input type="url" id="proxyUrlInput" placeholder="https://aura-proxy.YOUR-NAME.workers.dev"
+          <input type="password" id="proxyUrlInput" placeholder="AIza..."
                  class="flex-1 bg-slate-900 border border-slate-800 focus:border-amber-500/80 text-amber-300 font-mono text-xs rounded-lg px-3 py-2.5 focus:outline-none transition-all"/>
           <button onclick="testAndSaveProxy()" class="bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 font-mono text-xs px-4 py-2.5 rounded-lg transition-all whitespace-nowrap"><i class="fa-solid fa-plug mr-1"></i> TEST &amp; SAVE</button>
         </div>
         <p id="proxyTestResult" class="text-[10px] font-mono mt-1.5 hidden"></p>
       </div>
 
-      <!-- Current status -->
       <div class="flex items-center justify-between bg-slate-900/40 border border-slate-800 rounded-lg px-3 py-2">
-        <span class="text-[10px] font-mono text-slate-500">CURRENT PROXY:</span>
+        <span class="text-[10px] font-mono text-slate-500">STATUS:</span>
         <span id="currentProxyDisplay" class="text-[10px] font-mono text-slate-400">NOT SET</span>
       </div>
 
       <div class="flex gap-2 pt-1">
-        <button onclick="clearProxy()" class="flex-1 bg-slate-900 hover:bg-rose-950/30 border border-slate-800 hover:border-rose-500/30 text-slate-500 hover:text-rose-400 font-mono text-xs py-2.5 rounded-lg transition-all"><i class="fa-solid fa-trash mr-1"></i> CLEAR</button>
+        <button onclick="clearProxy()" class="flex-1 bg-slate-900 hover:bg-rose-950/30 border border-slate-800 hover:border-rose-500/30 text-slate-500 hover:text-rose-400 font-mono text-xs py-2.5 rounded-lg transition-all"><i class="fa-solid fa-trash mr-1"></i> CLEAR KEY</button>
         <button onclick="closeProxySetup()" class="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-300 font-mono text-xs py-2.5 rounded-lg transition-all font-bold"><i class="fa-solid fa-check mr-1"></i> DONE</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════
-     HEADER
-════════════════════════════════════════════ -->
+<!-- HEADER -->
 <header class="relative z-10 border-b border-cyan-950/60 bg-slate-950/60 backdrop-blur-md">
   <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
     <div class="flex items-center gap-3">
@@ -245,13 +223,11 @@
       </div>
     </div>
     <div class="flex items-center gap-2 flex-wrap justify-center">
-      <!-- Streak badge -->
       <div class="flex items-center gap-1.5 bg-orange-950/40 border border-orange-500/30 rounded-full px-3 py-1">
         <i class="fa-solid fa-fire flame-icon text-orange-400 text-sm"></i>
         <span class="font-orbitron font-bold text-orange-300 text-sm" id="streakCount">0</span>
         <span class="font-mono text-[9px] text-orange-400/70">DAY STREAK</span>
       </div>
-      <!-- Date display + nav -->
       <div class="flex items-center gap-1 bg-slate-900/80 border border-slate-800 rounded-lg overflow-hidden">
         <button onclick="navigateDay(-1)" class="px-2 py-1.5 hover:bg-slate-800 text-slate-400 hover:text-white transition-all text-xs"><i class="fa-solid fa-chevron-left"></i></button>
         <span class="font-mono text-xs text-cyan-300 px-2 py-1.5 min-w-[110px] text-center" id="currentDateDisplay">TODAY</span>
@@ -259,17 +235,15 @@
       </div>
       <button onclick="openHistoryModal()" class="text-xs font-mono border border-violet-500/30 hover:border-violet-400/60 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 px-3 py-1.5 rounded-lg transition-all"><i class="fa-solid fa-clock-rotate-left mr-1"></i> HISTORY</button>
       <button onclick="saveCurrentDay(true)" class="text-xs font-mono border border-cyan-500/20 hover:border-cyan-400/80 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 px-3 py-1.5 rounded-lg transition-all"><i class="fa-solid fa-floppy-disk mr-1"></i> SAVE</button>
-      <button onclick="openProxySetup()" id="btnProxySettings" class="text-xs font-mono border border-amber-500/20 hover:border-amber-400/60 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 px-3 py-1.5 rounded-lg transition-all" title="AI Scanner Proxy Settings"><i class="fa-solid fa-plug mr-1"></i> <span id="proxyBtnLabel">AI PROXY</span></button>
+      <button onclick="openProxySetup()" id="btnProxySettings" class="text-xs font-mono border border-amber-500/20 hover:border-amber-400/60 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 px-3 py-1.5 rounded-lg transition-all" title="Gemini API Key Settings"><i class="fa-solid fa-key mr-1"></i> <span id="proxyBtnLabel">GEMINI KEY</span></button>
     </div>
   </div>
 </header>
 
-<!-- ════════════════════════════════════════════
-     MAIN
-════════════════════════════════════════════ -->
+<!-- MAIN -->
 <main class="relative z-10 max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6" id="editor">
 
-  <!-- ══ LEFT: CONTROLS (5 cols) ══ -->
+  <!-- LEFT: CONTROLS (5 cols) -->
   <section class="lg:col-span-5 space-y-5">
 
     <!-- BIOMETRICS -->
@@ -350,7 +324,6 @@
     <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-xl relative overflow-hidden">
       <div class="absolute top-0 right-0 w-8 h-[1px] bg-emerald-500"></div><div class="absolute top-0 right-0 w-[1px] h-8 bg-emerald-500"></div>
       <h3 class="text-xs font-mono text-emerald-400 tracking-widest uppercase mb-3 flex items-center justify-between"><span><i class="fa-solid fa-utensils mr-2"></i>MEAL TRACKER</span><span id="trackedMealsCount" class="text-[9px] px-2 py-0.5 rounded bg-emerald-950/50 border border-emerald-500/30 text-emerald-300">0 LOGS</span></h3>
-      <!-- Manual entry -->
       <div class="space-y-2 mb-3">
         <div class="grid grid-cols-12 gap-1.5">
           <div class="col-span-4"><select id="newMealCategory" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 text-emerald-300 font-mono text-xs rounded-lg px-2 py-2 focus:outline-none"><option value="breakfast">🌅 BFAST</option><option value="lunch">☀️ LUNCH</option><option value="dinner">🌙 DINNER</option><option value="snacks">⚡ SNACKS</option></select></div>
@@ -367,7 +340,6 @@
         <div class="flex gap-1 text-[8px] font-mono text-slate-600 px-0.5">
           <span class="w-1/4 text-center">kcal</span><span class="w-1/6 text-center text-blue-400/40">pro g</span><span class="w-1/6 text-center text-amber-400/40">carb g</span><span class="w-1/6 text-center text-rose-400/40">fat g</span><span class="w-1/6"></span><span class="w-1/6"></span>
         </div>
-        <!-- Hidden file input for meal photo attach during manual add -->
         <input type="file" id="mealPhotoAttachInput" accept="image/*" class="hidden" onchange="handleMealPhotoAttach(event)"/>
         <div id="mealPhotoPreviewRow" class="hidden flex items-center gap-2 bg-slate-900/50 border border-slate-800 rounded-lg px-3 py-2">
           <img id="mealPhotoThumb" src="" class="w-10 h-10 object-cover rounded-md"/>
@@ -375,15 +347,12 @@
           <button onclick="removeMealPhoto()" class="text-rose-500/60 hover:text-rose-400 text-xs"><i class="fa-solid fa-xmark"></i></button>
         </div>
       </div>
-      <!-- AI scan button -->
       <button onclick="openPhotoModalForNewMeal()" class="w-full mb-3 bg-slate-900/60 hover:bg-slate-800/80 border border-cyan-500/20 hover:border-cyan-400/60 rounded-xl py-2.5 px-4 flex items-center justify-center gap-3 transition-all">
         <div class="relative"><i class="fa-solid fa-camera text-cyan-400 text-sm"></i><i class="fa-solid fa-bolt text-fuchsia-400 text-[8px] absolute -top-1 -right-1.5"></i></div>
         <span class="text-xs font-orbitron font-bold text-cyan-300 tracking-widest">SCAN FOOD WITH AI</span>
-        <span class="text-[9px] font-mono text-slate-500">PHOTO → MACROS</span>
+        <span class="text-[9px] font-mono text-slate-500">PHOTO → MACROS (GEMINI)</span>
       </button>
-      <!-- Meal list -->
       <div id="mealListContainer" class="max-h-[340px] overflow-y-auto space-y-2 mb-4 pr-0.5"></div>
-      <!-- Totals -->
       <div class="border-t border-slate-900 pt-3 space-y-2">
         <div class="flex items-center justify-between text-xs font-mono text-slate-400"><span>CALORIES LOGGED:</span><span id="sumTotalCals" class="text-emerald-400 font-bold">0 kcal</span></div>
         <div class="space-y-1.5">
@@ -411,7 +380,7 @@
     </div>
   </section>
 
-  <!-- ══ RIGHT: PAGINATED CARD PREVIEW (7 cols) ══ -->
+  <!-- RIGHT: PAGINATED CARD PREVIEW (7 cols) -->
   <section class="lg:col-span-7 flex flex-col items-center gap-4">
     <div class="flex items-center justify-between w-full max-w-[520px]">
       <h3 class="text-xs font-mono text-cyan-400 tracking-widest uppercase"><i class="fa-solid fa-display mr-1"></i> HOLO-PREVIEW</h3>
@@ -422,17 +391,13 @@
       </div>
     </div>
 
-    <!-- Card container -->
     <div id="exportContainer" class="p-3 bg-[#05080e] rounded-3xl border border-slate-950 shadow-2xl w-full max-w-[520px]">
       <div id="cardViewport" class="relative">
-        <!-- Pages injected by JS -->
       </div>
     </div>
 
-    <!-- Dot nav -->
     <div id="pageDots" class="flex items-center gap-1.5"></div>
 
-    <!-- Toast -->
     <div id="toastNotification" class="w-full max-w-[500px] bg-slate-950 border border-cyan-500/30 text-cyan-300 font-mono text-xs px-4 py-3 rounded-xl flex items-center justify-between shadow-2xl opacity-0 transition-opacity duration-300 pointer-events-none">
       <span id="toastMsg"></span>
       <i class="fa-solid fa-xmark cursor-pointer hover:text-white ml-3 shrink-0" onclick="hideToast()"></i>
@@ -443,29 +408,23 @@
 <footer class="bg-slate-950/90 border-t border-slate-900 py-6 relative z-10 mt-8">
   <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-mono text-slate-500">
     <p>© 2026 AURA SYNC SYSTEMS INC. v4</p>
-    <p>DAILY JOURNAL · STREAK ENGINE · AI MACRO SCANNER · LOCAL ONLY</p>
+    <p>DAILY JOURNAL · STREAK ENGINE · AI MACRO SCANNER (GEMINI) · LOCAL ONLY</p>
   </div>
 </footer>
 
-<!-- ════════════════════════════════════════════════════════════
-     JAVASCRIPT
-════════════════════════════════════════════════════════════ -->
 <script>
 // ═══════════════ CONSTANTS ═══════════════
-const GLOBAL_KEY = 'aura_v4_global';  // settings, streak
-const DAY_PREFIX  = 'aura_v4_day_';   // + YYYY-MM-DD
+const GLOBAL_KEY = 'aura_v4_global';
+const DAY_PREFIX  = 'aura_v4_day_';
 
-// ── PROXY CONFIG ──────────────────────────────────────────────
-// Direct calls to api.anthropic.com are blocked by CORS on
-// GitHub Pages and other static hosts. Set PROXY_URL to your
-// Cloudflare Worker URL, e.g.:
-//   'https://aura-proxy.YOUR-NAME.workers.dev'
-// Leave empty ('') to use direct call (works in claude.ai only).
-let PROXY_URL = localStorage.getItem('aura_proxy_url') || '';
+// ── GEMINI API KEY ────────────────────────────────────────────
+// The Gemini API supports direct browser calls (no CORS proxy needed).
+// Get your free key at: https://aistudio.google.com/app/apikey
+let GEMINI_API_KEY = localStorage.getItem('aura_gemini_api_key') || '';
+const GEMINI_MODEL = 'gemini-2.0-flash';
 
 function getApiEndpoint() {
-  const base = PROXY_URL ? PROXY_URL.replace(/\/$/, '') : 'https://api.anthropic.com';
-  return base + '/v1/messages';
+  return `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 }
 
 // ═══════════════ STATE ═══════════════
@@ -475,23 +434,19 @@ let currentAspect = '1:1';
 let bodyGoal      = 'cut';
 let targets       = { cals:0, protein:0, carbs:0, fat:0 };
 
-// Daily data (for the currently viewed date)
-let viewingDate   = todayStr();  // YYYY-MM-DD
+let viewingDate   = todayStr();
 let isViewingToday = true;
-let loggedMeals   = [];  // {id, category, name, cals, protein, carbs, fat, fiber, aiScanned, photoDataUrl}
+let loggedMeals   = [];
 
-// Photo modal state
 let photoBase64    = null;
 let photoMimeType  = 'image/jpeg';
 let aiResult       = {};
-let photoModalMode = 'new';   // 'new' | 'attach'
-let photoModalMealId = null;  // when mode=attach
+let photoModalMode = 'new';
+let photoModalMealId = null;
 let photoCategory  = 'breakfast';
 
-// Pending new meal photo (manual add)
 let pendingMealPhotoDataUrl = null;
 
-// Card pagination
 let currentPage = 0;
 
 // ═══════════════ DATE HELPERS ═══════════════
@@ -517,7 +472,7 @@ function daysBetween(a, b) {
 function navigateDay(delta) {
   saveCurrentDay();
   const newDate = addDays(viewingDate, delta);
-  if (newDate > todayStr()) return; // can't go to future
+  if (newDate > todayStr()) return;
   viewingDate = newDate;
   isViewingToday = (viewingDate === todayStr());
   loadDay(viewingDate);
@@ -535,7 +490,6 @@ function updateDateDisplay() {
 function calcStreak() {
   let streak = 0;
   let check = todayStr();
-  // check if today has data (even just biometrics saved)
   while (true) {
     const raw = localStorage.getItem(DAY_PREFIX + check);
     if (!raw) break;
@@ -574,7 +528,6 @@ function saveCurrentDay(explicit = false) {
   try {
     const data = getDayData();
     localStorage.setItem(DAY_PREFIX + viewingDate, JSON.stringify(data));
-    // Also save global prefs
     saveGlobal();
     updateStorageStatus(true, data.savedAt);
     updateStreakDisplay();
@@ -605,7 +558,6 @@ function loadDay(dateStr) {
       applyUnitLabels();
     } catch(e) { loggedMeals = []; }
   } else {
-    // New day — carry over biometrics from most recent day
     const prev = localStorage.getItem(DAY_PREFIX + addDays(dateStr, -1));
     if (prev) {
       try {
@@ -655,13 +607,12 @@ function closeHistoryModal() {
 function renderHistoryList() {
   const container = document.getElementById('historyList');
   const empty     = document.getElementById('historyEmpty');
-  // Collect all day keys
   const days = [];
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i);
     if (k && k.startsWith(DAY_PREFIX)) days.push(k.replace(DAY_PREFIX, ''));
   }
-  days.sort((a,b) => b.localeCompare(a)); // newest first
+  days.sort((a,b) => b.localeCompare(a));
   if (days.length === 0) {
     container.innerHTML = '';
     empty.classList.remove('hidden');
@@ -765,7 +716,6 @@ function updateAll() {
 }
 
 function autoSave() {
-  // Debounced auto-save: only save after 1.5s of inactivity
   clearTimeout(updateAll._saveTimer);
   updateAll._saveTimer = setTimeout(() => saveCurrentDay(), 1500);
 }
@@ -793,7 +743,6 @@ function updateSidebar(t) {
   if (remaining >= 0) { remEl.textContent = `${remaining.toLocaleString()} kcal left`; remEl.className = 'text-teal-400 font-bold'; }
   else                { remEl.textContent = `OVER +${Math.abs(remaining).toLocaleString()} kcal`; remEl.className = 'text-rose-400 font-bold animate-pulse'; }
 
-  // Meal list grouped by category
   const mealContainer = document.getElementById('mealListContainer');
   const CATS = [
     { key:'breakfast', label:'🌅 BREAKFAST', color:'text-amber-400',  border:'border-amber-500/20',  bg:'bg-amber-950/10' },
@@ -851,7 +800,6 @@ function cardBase(pageIdx, totalPages, subject, dateStr, theme) {
     style="background-color:#060a12;border:2px solid ${th.border};${currentAspect==='9:16'?'width:380px;min-height:675px':'width:480px;min-height:480px'}">
     <div class="scanning-bar absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent ${th.scan} to-transparent z-20 pointer-events-none"></div>
     <div class="absolute inset-0 scanline pointer-events-none opacity-[0.12] z-10"></div>
-    <!-- header -->
     <div class="px-5 pt-4 pb-2 relative z-10 flex justify-between items-start">
       <div>
         <div class="flex items-center gap-2 mb-1">
@@ -884,10 +832,8 @@ function renderCardPages(t) {
   const remaining    = targets.cals - totalCals;
   const th = themes[currentTheme] || themes.cyberpunk;
 
-  // Build page array
   const pages = [];
 
-  // ── PAGE 1: BIOMETRICS OVERVIEW ──
   const wMax = unitSystem === 'metric' ? 200 : 440;
   const wOff = Math.max(0, 276 - (276 * Math.min(1, weight/wMax)));
   const fOff = Math.max(0, 276 - (276 * Math.min(1, fat/50)));
@@ -897,7 +843,6 @@ function renderCardPages(t) {
 
   let p1 = cardBase(0, Math.max(1, pages.length + 1 + loggedMeals.length), subj, viewingDate, currentTheme);
   p1 += `<div class="px-5 py-2 flex items-center justify-around gap-3 relative z-10">
-    <!-- Weight ring -->
     <div class="relative w-28 h-28 flex items-center justify-center shrink-0">
       <svg class="absolute inset-0 -rotate-90" viewBox="0 0 100 100">
         <circle cx="50" cy="50" r="44" stroke="#1e293b" stroke-width="2" fill="transparent"/>
@@ -905,7 +850,6 @@ function renderCardPages(t) {
       </svg>
       <div class="text-center z-10"><p class="text-[7px] font-mono text-slate-400 uppercase">WEIGHT</p><p class="text-xl font-black font-orbitron text-white leading-none">${weight.toFixed(1)}</p><p class="text-[9px] font-mono font-bold" style="color:${th.wc}">${wu}</p></div>
     </div>
-    <!-- Fat ring -->
     <div class="relative w-28 h-28 flex items-center justify-center shrink-0">
       <svg class="absolute inset-0 -rotate-90" viewBox="0 0 100 100">
         <circle cx="50" cy="50" r="44" stroke="#1e293b" stroke-width="2" fill="transparent"/>
@@ -913,13 +857,11 @@ function renderCardPages(t) {
       </svg>
       <div class="text-center z-10"><p class="text-[7px] font-mono text-slate-400 uppercase">BODY FAT</p><p class="text-xl font-black font-orbitron text-white leading-none">${fat.toFixed(1)}</p><p class="text-[9px] font-mono font-bold" style="color:${th.fc}">%</p></div>
     </div>
-    <!-- BMR/TDEE stack -->
     <div class="flex flex-col gap-1.5">
       <div class="bg-slate-900/50 border border-amber-500/15 rounded-lg p-2 text-center min-w-[64px]"><p class="text-[7px] font-mono text-slate-500">BMR</p><p class="text-sm font-orbitron font-bold text-amber-400">${t.bmr||'—'}</p><p class="text-[7px] font-mono text-slate-600">kcal</p></div>
       <div class="bg-slate-900/50 border border-orange-500/15 rounded-lg p-2 text-center"><p class="text-[7px] font-mono text-slate-500">TDEE</p><p class="text-sm font-orbitron font-bold text-orange-400">${t.tdee||'—'}</p><p class="text-[7px] font-mono text-slate-600">kcal</p></div>
     </div>
   </div>
-  <!-- Target vs Intake -->
   <div class="px-5 pb-2 relative z-10">
     <div class="h-[1px] bg-slate-800 my-2 flex items-center justify-center"><span class="text-[7px] font-mono text-slate-500 bg-slate-950 px-2 uppercase">DAILY TARGET vs INTAKE</span></div>
     <div class="grid grid-cols-2 gap-2 mb-2">
@@ -934,13 +876,11 @@ function renderCardPages(t) {
         <p class="text-[7px] font-mono ${remaining>=0?'text-teal-400':'text-rose-400'}">${remaining>=0?`${remaining} left`:`+${Math.abs(remaining)} over`}</p>
       </div>
     </div>
-    <!-- Macro targets vs logged -->
     <div class="grid grid-cols-3 gap-1.5 mb-2">
       <div class="bg-slate-900/40 border border-blue-500/10 rounded-lg p-1.5 text-center"><p class="text-[7px] font-mono text-blue-400/70 uppercase">PROTEIN</p><p class="text-xs font-orbitron font-bold text-blue-400">${Math.round(totalProtein)}</p><p class="text-[7px] font-mono text-slate-600">/ ${targets.protein||'—'}g</p></div>
       <div class="bg-slate-900/40 border border-amber-500/10 rounded-lg p-1.5 text-center"><p class="text-[7px] font-mono text-amber-400/70 uppercase">CARBS</p><p class="text-xs font-orbitron font-bold text-amber-400">${Math.round(totalCarbs)}</p><p class="text-[7px] font-mono text-slate-600">/ ${targets.carbs||'—'}g</p></div>
       <div class="bg-slate-900/40 border border-rose-500/10 rounded-lg p-1.5 text-center"><p class="text-[7px] font-mono text-rose-400/70 uppercase">FAT</p><p class="text-xs font-orbitron font-bold text-rose-400">${Math.round(totalFatLog)}</p><p class="text-[7px] font-mono text-slate-600">/ ${targets.fat||'—'}g</p></div>
     </div>
-    <!-- Aux stats row -->
     <div class="grid grid-cols-3 gap-1.5">
       <div class="bg-slate-900/40 border border-slate-800 rounded-lg p-1.5 text-center"><p class="text-[7px] font-mono text-slate-500 uppercase">MUSCLE</p><p class="text-sm font-orbitron font-bold text-emerald-400">${muscle.toFixed(1)}</p><p class="text-[7px] font-mono text-slate-600">${wu}</p></div>
       <div class="bg-slate-900/40 border border-slate-800 rounded-lg p-1.5 text-center"><p class="text-[7px] font-mono text-slate-500 uppercase">VISCERAL</p><p class="text-sm font-orbitron font-bold text-violet-400">${vis}</p><p class="text-[7px] font-mono text-slate-600">LEVEL</p></div>
@@ -951,7 +891,6 @@ function renderCardPages(t) {
 </div>`;
   pages.push(p1);
 
-  // ── MEAL PAGES: one page per logged meal ──
   loggedMeals.forEach((meal, idx) => {
     const catColors = { breakfast:'#fbbf24', lunch:'#facc15', dinner:'#60a5fa', snacks:'#a78bfa' };
     const catLabels = { breakfast:'🌅 BREAKFAST', lunch:'☀️ LUNCH', dinner:'🌙 DINNER', snacks:'⚡ SNACKS' };
@@ -961,25 +900,21 @@ function renderCardPages(t) {
 
     let pg = cardBase(idx+1, pages.length + 1 + (loggedMeals.length - idx), subj, viewingDate, currentTheme);
     pg += `<div class="px-5 pb-4 relative z-10 flex flex-col gap-3 flex-1">
-      <!-- Category chip -->
       <div class="flex items-center gap-2">
         <span class="text-[9px] font-orbitron font-bold px-2 py-0.5 rounded-full border" style="color:${cc};border-color:${cc}44;background:${cc}11">${cl}</span>
         <span class="text-[9px] font-mono text-slate-500">MEAL ${idx+1} of ${loggedMeals.length}</span>
       </div>
-      <!-- Food name + calorie hero -->
       <div class="text-center py-2">
         <p class="text-xl font-orbitron font-black text-white leading-tight mb-1">${meal.name}</p>
         <p class="text-4xl font-orbitron font-black" style="color:${th.accent}">${meal.cals||0}</p>
         <p class="text-[10px] font-mono text-slate-400">KCAL</p>
       </div>
-      <!-- Macro breakdown -->
       <div class="grid grid-cols-4 gap-2">
         <div class="bg-slate-900/50 border border-blue-500/15 rounded-xl p-2 text-center"><p class="text-[7px] font-mono text-blue-400/80 uppercase">PROTEIN</p><p class="text-lg font-orbitron font-bold text-blue-400">${meal.protein||0}</p><p class="text-[7px] font-mono text-slate-600">g</p></div>
         <div class="bg-slate-900/50 border border-amber-500/15 rounded-xl p-2 text-center"><p class="text-[7px] font-mono text-amber-400/80 uppercase">CARBS</p><p class="text-lg font-orbitron font-bold text-amber-400">${meal.carbs||0}</p><p class="text-[7px] font-mono text-slate-600">g</p></div>
         <div class="bg-slate-900/50 border border-rose-500/15 rounded-xl p-2 text-center"><p class="text-[7px] font-mono text-rose-400/80 uppercase">FAT</p><p class="text-lg font-orbitron font-bold text-rose-400">${meal.fat||0}</p><p class="text-[7px] font-mono text-slate-600">g</p></div>
         <div class="bg-slate-900/50 border border-emerald-500/15 rounded-xl p-2 text-center"><p class="text-[7px] font-mono text-emerald-400/80 uppercase">FIBER</p><p class="text-lg font-orbitron font-bold text-emerald-400">${meal.fiber||0}</p><p class="text-[7px] font-mono text-slate-600">g</p></div>
       </div>
-      <!-- Macro kcal bar -->
       ${totalMacroKcal > 0 ? (() => {
         const pW = Math.round(((meal.protein||0)*4/totalMacroKcal)*100);
         const cW = Math.round(((meal.carbs||0)*4/totalMacroKcal)*100);
@@ -996,27 +931,22 @@ function renderCardPages(t) {
           </div>
         </div>`;
       })() : ''}
-      <!-- Food photo (if attached) -->
       ${meal.photoDataUrl ? `<div class="rounded-xl overflow-hidden border border-slate-800" style="max-height:160px"><img src="${meal.photoDataUrl}" class="w-full object-cover" style="max-height:160px"/></div>` : `<div class="flex items-center justify-center rounded-xl border border-dashed border-slate-800 text-slate-700 font-mono text-[9px] py-4"><i class="fa-solid fa-image mr-2"></i>NO PHOTO ATTACHED</div>`}
-      ${meal.aiScanned ? `<div class="text-center text-[8px] font-mono text-cyan-500/50"><i class="fa-solid fa-microchip mr-1"></i>AI DETECTED</div>` : ''}
+      ${meal.aiScanned ? `<div class="text-center text-[8px] font-mono text-cyan-500/50"><i class="fa-solid fa-microchip mr-1"></i>AI DETECTED (GEMINI)</div>` : ''}
     </div></div>`;
     pages.push(pg);
   });
 
-  // Inject into DOM
   const vp = document.getElementById('cardViewport');
   vp.innerHTML = pages.map((html, i) =>
     `<div class="card-page${i === currentPage ? ' active' : ''}" data-page="${i}">${html}</div>`
   ).join('');
 
-  // Set viewport height to match current page
   const activePage = vp.querySelector('.card-page.active');
   if (activePage) vp.style.minHeight = activePage.offsetHeight + 'px';
 
-  // Update pagination controls
   updatePagination(pages.length);
 
-  // Update streak label on card
   const streakEl = document.getElementById('streakCardLabel');
   if (streakEl) streakEl.textContent = `🔥 ${calcStreak()} DAY STREAK`;
 }
@@ -1028,7 +958,6 @@ function updatePagination(total) {
   prevBtn.disabled = currentPage <= 0;
   nextBtn.disabled = currentPage >= total - 1;
   ind.textContent  = `PAGE ${currentPage+1} / ${total}`;
-  // Dots
   const dots = document.getElementById('pageDots');
   dots.innerHTML = Array.from({length: total}, (_, i) =>
     `<button onclick="goToPage(${i})" class="w-2 h-2 rounded-full transition-all ${i===currentPage ? 'bg-cyan-400 w-4' : 'bg-slate-700 hover:bg-slate-500'}"></button>`
@@ -1042,7 +971,6 @@ function goToPage(n) {
   pages.forEach((p,i) => { p.classList.toggle('active', i === n); });
   currentPage = n;
   updatePagination(pages.length);
-  // Sync height
   const active = vp.querySelector('.card-page.active');
   if (active) vp.style.minHeight = active.scrollHeight + 'px';
 }
@@ -1114,8 +1042,7 @@ function attachPhotoToMeal(mealId) {
   document.getElementById('btnScanLabel').textContent = 'AI ANALYZE';
   document.getElementById('btnLogLabel').textContent  = 'ATTACH PHOTO';
   document.getElementById('btnScanPhoto').disabled   = true;
-  document.getElementById('btnLogDetected').disabled = false; // can attach without AI
-  // If meal already has a photo, show it
+  document.getElementById('btnLogDetected').disabled = false;
   if (meal?.photoDataUrl) {
     document.getElementById('photoEmptyState').classList.add('hidden');
     document.getElementById('photoPreviewState').classList.remove('hidden');
@@ -1126,7 +1053,7 @@ function attachPhotoToMeal(mealId) {
 }
 
 function viewMealPhoto(mealId) {
-  attachPhotoToMeal(mealId); // reuse the modal to view/replace
+  attachPhotoToMeal(mealId);
 }
 
 // ═══════════════ PHOTO MODAL ═══════════════
@@ -1136,7 +1063,7 @@ function openPhotoModalForNewMeal() {
   photoBase64      = null;
   aiResult         = {};
   document.getElementById('photoModalTitle').textContent = 'AI FOOD SCANNER';
-  document.getElementById('photoModalSub').textContent   = 'PHOTO → CALORIES + MACROS';
+  document.getElementById('photoModalSub').textContent   = 'PHOTO → CALORIES + MACROS (GEMINI)';
   document.getElementById('photoNewMealFields').classList.remove('hidden');
   document.getElementById('aiResultPanel').classList.add('hidden');
   document.getElementById('photoStatusBar').classList.add('hidden');
@@ -1196,7 +1123,6 @@ function setPhotoCategory(cat) {
 
 function commitPhotoAction() {
   if (photoModalMode === 'attach') {
-    // Just attach the currently previewed photo to the meal
     const meal = loggedMeals.find(m => m.id === photoModalMealId);
     if (meal && photoBase64) {
       const img = document.getElementById('photoPreviewImg');
@@ -1210,16 +1136,25 @@ function commitPhotoAction() {
   }
 }
 
+// ═══════════════ GEMINI API CALL ═══════════════
 async function scanPhotoCalories() {
   if (!photoBase64) return;
+
+  // Check for API key
+  if (!GEMINI_API_KEY) {
+    showToast("<i class='fa-solid fa-key text-amber-400 mr-2'></i> NO GEMINI API KEY — CLICK 'GEMINI KEY' BUTTON TO ADD ONE");
+    return;
+  }
+
   document.getElementById('btnScanPhoto').disabled   = true;
   document.getElementById('btnLogDetected').disabled = true;
   document.getElementById('aiResultPanel').classList.add('hidden');
   document.getElementById('photoStatusBar').classList.remove('hidden');
   document.getElementById('photoScanOverlay').classList.remove('hidden');
+
   const msgs = [
     "<i class='fa-solid fa-circle-notch animate-spin mr-2'></i> UPLOADING FOOD SIGNATURE...",
-    "<i class='fa-solid fa-circle-notch animate-spin mr-2'></i> RUNNING NEURAL FOOD RECOGNITION...",
+    "<i class='fa-solid fa-circle-notch animate-spin mr-2'></i> RUNNING GEMINI VISION...",
     "<i class='fa-solid fa-circle-notch animate-spin mr-2'></i> COMPUTING MACRO BREAKDOWN...",
     "<i class='fa-solid fa-circle-notch animate-spin mr-2'></i> CROSS-REFERENCING CALORIC DATABASE...",
   ];
@@ -1227,22 +1162,59 @@ async function scanPhotoCalories() {
   const sEl = document.getElementById('photoStatusText');
   sEl.innerHTML = msgs[0];
   const iv = setInterval(()=>{ mi=(mi+1)%msgs.length; sEl.innerHTML=msgs[mi]; }, 1300);
+
   try {
+    // ── GEMINI API REQUEST FORMAT ──────────────────────────────
     const resp = await fetch(getApiEndpoint(), {
-      method:"POST", headers:{"Content-Type":"application/json"},
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model:"claude-sonnet-4-20250514", max_tokens:1000,
-        system:`You are a nutritionist AI. Respond ONLY with a single JSON object, no markdown or prose.
+        contents: [{
+          parts: [
+            {
+              inline_data: {
+                mime_type: photoMimeType,
+                data: photoBase64
+              }
+            },
+            {
+              text: `You are a nutritionist AI. Analyze this food image and respond ONLY with a single JSON object — no markdown, no prose, no code fences.
 Required fields: { "food_name":"ALL CAPS max 5 words", "calories":<int>, "protein":<int>, "carbs":<int>, "fat":<int>, "fiber":<int>, "confidence":"HIGH"|"MEDIUM"|"LOW", "serving_note":"brief serving assumption", "breakdown":"max 120 chars on key ingredients" }
-Verify: calories ≈ protein*4 + carbs*4 + fat*9. If unidentifiable: all zeros, confidence LOW.`,
-        messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:photoMimeType,data:photoBase64}},{type:"text",text:"Analyze this food image."}]}]
+Verify: calories ≈ protein*4 + carbs*4 + fat*9. If unidentifiable: all zeros, confidence LOW.`
+            }
+          ]
+        }],
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 512
+        }
       })
     });
+
     clearInterval(iv);
-    if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e?.error?.message||`API ${resp.status}`); }
+
+    if (!resp.ok) {
+      const e = await resp.json().catch(()=>({}));
+      const errMsg = e?.error?.message || `API error ${resp.status}`;
+      if (resp.status === 400 && errMsg.includes('API_KEY')) {
+        showToast("<i class='fa-solid fa-key text-rose-500 mr-2'></i> INVALID API KEY — OPEN GEMINI KEY SETTINGS");
+      } else {
+        throw new Error(errMsg);
+      }
+      document.getElementById('photoScanOverlay').classList.add('hidden');
+      document.getElementById('photoStatusBar').classList.add('hidden');
+      document.getElementById('btnScanPhoto').disabled = false;
+      return;
+    }
+
     const data = await resp.json();
-    const raw  = data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
-    aiResult   = JSON.parse(raw.replace(/```json|```/gi,'').trim());
+
+    // ── GEMINI RESPONSE PARSING ────────────────────────────────
+    // Gemini returns: data.candidates[0].content.parts[0].text
+    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const cleaned = rawText.replace(/```json|```/gi, '').trim();
+    aiResult = JSON.parse(cleaned);
+
     document.getElementById('aiDetectedFood').textContent  = aiResult.food_name||'FOOD';
     document.getElementById('aiServingNote').textContent   = aiResult.serving_note||'';
     document.getElementById('aiDetectedCals').textContent  = Math.max(0,parseInt(aiResult.calories)||0);
@@ -1252,17 +1224,21 @@ Verify: calories ≈ protein*4 + carbs*4 + fat*9. If unidentifiable: all zeros, 
     document.getElementById('aiFiber').textContent         = Math.max(0,parseInt(aiResult.fiber)||0);
     document.getElementById('aiBreakdownNote').textContent = aiResult.breakdown||'';
     document.getElementById('aiCalOverride').value         = Math.max(0,parseInt(aiResult.calories)||0);
+
     const conf = aiResult.confidence||'MEDIUM';
     const badge = document.getElementById('aiConfidenceBadge');
     badge.textContent = `CONF: ${conf}`;
     badge.className = `text-[9px] font-mono px-2 py-0.5 rounded border ${conf==='HIGH'?'bg-emerald-950/50 border-emerald-500/30 text-emerald-300':conf==='LOW'?'bg-rose-950/50 border-rose-500/30 text-rose-300':'bg-amber-950/50 border-amber-500/30 text-amber-300'}`;
+
     if (!document.getElementById('photoMealNameOverride').value.trim())
       document.getElementById('photoMealNameOverride').value = aiResult.food_name||'';
+
     document.getElementById('photoScanOverlay').classList.add('hidden');
     document.getElementById('photoStatusBar').classList.add('hidden');
     document.getElementById('aiResultPanel').classList.remove('hidden');
     document.getElementById('btnLogDetected').disabled = false;
     document.getElementById('btnScanPhoto').disabled   = false;
+
   } catch(err) {
     clearInterval(iv);
     document.getElementById('photoScanOverlay').classList.add('hidden');
@@ -1411,12 +1387,18 @@ function hideToast() {
   t.style.opacity='0'; t.style.pointerEvents='none';
 }
 
-// ═══════════════ PROXY SETUP ═══════════════
+// ═══════════════ GEMINI KEY SETTINGS (replaces proxy setup) ═══════════════
 function openProxySetup() {
   const input = document.getElementById('proxyUrlInput');
   const display = document.getElementById('currentProxyDisplay');
-  if (PROXY_URL) { input.value = PROXY_URL; display.textContent = PROXY_URL; }
-  else { input.value = ''; display.textContent = 'NOT SET'; }
+  // Show masked key if set
+  if (GEMINI_API_KEY) {
+    input.value = GEMINI_API_KEY;
+    display.textContent = 'KEY SET ✓ (' + GEMINI_API_KEY.slice(0,8) + '...)';
+  } else {
+    input.value = '';
+    display.textContent = 'NOT SET';
+  }
   document.getElementById('proxyTestResult').classList.add('hidden');
   document.getElementById('proxySetupModal').classList.add('open');
 }
@@ -1424,12 +1406,12 @@ function openProxySetup() {
 function updateProxyBtn() {
   const btn = document.getElementById('proxyBtnLabel');
   if (!btn) return;
-  if (PROXY_URL) {
-    btn.textContent = 'AI PROXY ✓';
+  if (GEMINI_API_KEY) {
+    btn.textContent = 'GEMINI KEY ✓';
     document.getElementById('btnProxySettings').classList.remove('border-amber-500/20','text-amber-400','bg-amber-500/10');
     document.getElementById('btnProxySettings').classList.add('border-emerald-500/30','text-emerald-400','bg-emerald-500/10');
   } else {
-    btn.textContent = 'AI PROXY';
+    btn.textContent = 'GEMINI KEY';
     document.getElementById('btnProxySettings').classList.add('border-amber-500/20','text-amber-400','bg-amber-500/10');
     document.getElementById('btnProxySettings').classList.remove('border-emerald-500/30','text-emerald-400','bg-emerald-500/10');
   }
@@ -1440,33 +1422,42 @@ function closeProxySetup() {
 }
 
 async function testAndSaveProxy() {
-  const val = document.getElementById('proxyUrlInput').value.trim().replace(/\/$/, '');
+  const val = document.getElementById('proxyUrlInput').value.trim();
   const resultEl = document.getElementById('proxyTestResult');
   resultEl.classList.remove('hidden');
   resultEl.className = 'text-[10px] font-mono mt-1.5 text-cyan-400/80';
-  resultEl.innerHTML = "<i class='fa-solid fa-circle-notch animate-spin mr-1'></i> TESTING CONNECTION...";
+  resultEl.innerHTML = "<i class='fa-solid fa-circle-notch animate-spin mr-1'></i> TESTING KEY WITH GEMINI...";
 
   if (!val) {
     resultEl.className = 'text-[10px] font-mono mt-1.5 text-rose-400';
-    resultEl.innerHTML = "<i class='fa-solid fa-xmark mr-1'></i> URL IS EMPTY";
+    resultEl.innerHTML = "<i class='fa-solid fa-xmark mr-1'></i> KEY IS EMPTY";
     return;
   }
 
-  // Send a minimal test payload (invalid, but enough to check CORS + reachability)
+  // Test the key with a minimal Gemini text request
   try {
-    const resp = await fetch(val + '/v1/messages', {
+    const testEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${val}`;
+    const resp = await fetch(testEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1, messages: [{ role: 'user', content: 'hi' }] }),
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: 'Reply with just the word OK.' }] }],
+        generationConfig: { maxOutputTokens: 5 }
+      })
     });
-    // Any response (even 400/500) means the proxy is reachable and CORS is working
-    PROXY_URL = val;
-    localStorage.setItem('aura_proxy_url', val);
-    document.getElementById('currentProxyDisplay').textContent = val;
-    resultEl.className = 'text-[10px] font-mono mt-1.5 text-emerald-400';
-    resultEl.innerHTML = `<i class='fa-solid fa-check mr-1'></i> CONNECTED (HTTP ${resp.status}) — PROXY SAVED`;
-    document.getElementById('proxyBanner').classList.add('hidden');
-    updateProxyBtn();
+
+    if (resp.ok) {
+      GEMINI_API_KEY = val;
+      localStorage.setItem('aura_gemini_api_key', val);
+      document.getElementById('currentProxyDisplay').textContent = 'KEY SET ✓ (' + val.slice(0,8) + '...)';
+      resultEl.className = 'text-[10px] font-mono mt-1.5 text-emerald-400';
+      resultEl.innerHTML = `<i class='fa-solid fa-check mr-1'></i> KEY VALID — GEMINI CONNECTED`;
+      document.getElementById('proxyBanner').classList.add('hidden');
+      updateProxyBtn();
+    } else {
+      const e = await resp.json().catch(()=>({}));
+      throw new Error(e?.error?.message || `HTTP ${resp.status}`);
+    }
   } catch(e) {
     resultEl.className = 'text-[10px] font-mono mt-1.5 text-rose-400';
     resultEl.innerHTML = `<i class='fa-solid fa-xmark mr-1'></i> FAILED: ${String(e.message).slice(0, 80)}`;
@@ -1474,22 +1465,21 @@ async function testAndSaveProxy() {
 }
 
 function clearProxy() {
-  PROXY_URL = '';
-  localStorage.removeItem('aura_proxy_url');
+  GEMINI_API_KEY = '';
+  localStorage.removeItem('aura_gemini_api_key');
   document.getElementById('proxyUrlInput').value = '';
   document.getElementById('currentProxyDisplay').textContent = 'NOT SET';
   const resultEl = document.getElementById('proxyTestResult');
   resultEl.className = 'text-[10px] font-mono mt-1.5 text-amber-400';
   resultEl.classList.remove('hidden');
-  resultEl.innerHTML = "<i class='fa-solid fa-trash mr-1'></i> PROXY CLEARED";
+  resultEl.innerHTML = "<i class='fa-solid fa-trash mr-1'></i> KEY CLEARED";
   updateProxyBtn();
 }
 
 // ═══════════════ BOOT ═══════════════
 window.onload = function() {
-  // Load saved proxy URL
-  const savedProxy = localStorage.getItem('aura_proxy_url');
-  if (savedProxy) PROXY_URL = savedProxy;
+  const savedKey = localStorage.getItem('aura_gemini_api_key');
+  if (savedKey) GEMINI_API_KEY = savedKey;
   setTimeout(updateProxyBtn, 50);
 
   loadGlobal();
@@ -1506,16 +1496,11 @@ window.onload = function() {
   const hasTodayData = !!localStorage.getItem(DAY_PREFIX + viewingDate);
   if (hasTodayData) showToast("<i class='fa-solid fa-database text-cyan-400 mr-2'></i> TODAY'S SESSION RESTORED.");
 
-  // Show proxy banner on static hosts without a proxy configured
-  const isStaticHost = window.location.protocol === 'https:' &&
-    !window.location.hostname.includes('claude.ai') &&
-    !window.location.hostname.includes('localhost') &&
-    !window.location.hostname.includes('127.0.0.1');
-  if (isStaticHost && !PROXY_URL) {
+  // Show banner if no Gemini key set
+  if (!GEMINI_API_KEY) {
     document.getElementById('proxyBanner').classList.remove('hidden');
   }
 
-  // Close proxy modal on backdrop click
   document.getElementById('proxySetupModal').addEventListener('click', e => {
     if (e.target === document.getElementById('proxySetupModal')) closeProxySetup();
   });
