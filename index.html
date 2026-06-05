@@ -1,1002 +1,1342 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AURA SYNC // Futuristic Biometrics Share</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        orbitron: ['Orbitron', 'sans-serif'],
-                        mono: ['"Share Tech Mono"', 'monospace'],
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    boxShadow: {
-                        'neon-cyan': '0 0 15px rgba(6, 182, 212, 0.4)',
-                        'neon-pink': '0 0 15px rgba(236, 72, 153, 0.4)',
-                        'neon-green': '0 0 15px rgba(34, 197, 94, 0.4)',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        .glow-cyan { text-shadow: 0 0 8px rgba(6, 182, 212, 0.6); }
-        .glow-pink { text-shadow: 0 0 8px rgba(236, 72, 153, 0.6); }
-        .glow-green { text-shadow: 0 0 8px rgba(34, 197, 94, 0.6); }
-        .glow-amber { text-shadow: 0 0 8px rgba(245, 158, 11, 0.6); }
-        
-        .scanline {
-            background: linear-gradient(
-                to bottom,
-                rgba(255,255,255,0),
-                rgba(255,255,255,0) 50%,
-                rgba(0, 242, 254, 0.1) 50%,
-                rgba(0, 242, 254, 0.1)
-            );
-            background-size: 100% 4px;
-        }
-
-        .grid-bg {
-            background-size: 40px 40px;
-            background-image: 
-                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-        }
-
-        @keyframes scan-anim {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
-        }
-
-        .scanning-bar {
-            animation: scan-anim 4s linear infinite;
-        }
-
-        /* Save indicator pulse */
-        @keyframes save-flash {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-        .save-flash { animation: save-flash 0.6s ease-in-out 2; }
-
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
-        ::-webkit-scrollbar-thumb { background: rgba(6, 182, 212, 0.4); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(6, 182, 212, 0.8); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AURA SYNC v4 // Daily Biometric Journal</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{orbitron:['Orbitron','sans-serif'],mono:['"Share Tech Mono"','monospace'],sans:['Inter','sans-serif']}}}}</script>
+<style>
+.scanline{background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,0) 50%,rgba(0,242,254,0.08) 50%,rgba(0,242,254,0.08));background-size:100% 4px}
+.grid-bg{background-size:40px 40px;background-image:linear-gradient(to right,rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,0.025) 1px,transparent 1px)}
+@keyframes scan-anim{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
+.scanning-bar{animation:scan-anim 4s linear infinite}
+@keyframes ai-scan{0%{top:0%}100%{top:100%}}
+.ai-scan-line{animation:ai-scan 1.2s linear infinite}
+.bar-fill{transition:width 0.6s cubic-bezier(.4,0,.2,1)}
+.modal-base{transition:opacity .22s ease;opacity:0;pointer-events:none}
+.modal-base.open{opacity:1;pointer-events:auto}
+/* card pages */
+#cardViewport{position:relative;overflow:hidden}
+.card-page{position:absolute;inset:0;transition:transform .4s cubic-bezier(.4,0,.2,1),opacity .4s ease;opacity:0;pointer-events:none}
+.card-page.active{opacity:1;pointer-events:auto;position:relative}
+/* streak flame pulse */
+@keyframes flame{0%,100%{filter:drop-shadow(0 0 4px #f97316)}50%{filter:drop-shadow(0 0 10px #fb923c)}}
+.flame-icon{animation:flame 1.5s ease-in-out infinite}
+/* history day row hover */
+.day-row:hover{background:rgba(6,182,212,0.05)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:rgba(15,23,42,0.5)}
+::-webkit-scrollbar-thumb{background:rgba(6,182,212,0.35);border-radius:3px}
+/* food photo on card */
+.meal-photo{width:100%;height:120px;object-fit:cover;border-radius:8px}
+</style>
 </head>
 <body class="bg-[#070b13] text-slate-100 font-sans selection:bg-cyan-500 selection:text-black overflow-x-hidden min-h-screen">
+<div class="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-cyan-900/10 blur-[120px] pointer-events-none z-0"></div>
+<div class="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-fuchsia-950/15 blur-[120px] pointer-events-none z-0"></div>
 
-    <div class="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-cyan-900/15 blur-[120px] pointer-events-none z-0"></div>
-    <div class="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-fuchsia-950/20 blur-[120px] pointer-events-none z-0"></div>
-
-    <!-- Navigation Header -->
-    <header class="relative z-10 border-b border-cyan-950/60 bg-slate-950/60 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <div class="relative h-10 w-10 flex items-center justify-center bg-cyan-950/50 border border-cyan-500/30 rounded-lg shadow-neon-cyan">
-                    <i class="fa-solid fa-fingerprint text-cyan-400 text-xl animate-pulse"></i>
-                    <div class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-pink-500 rounded-full"></div>
-                </div>
-                <div>
-                    <h1 class="text-xl font-black font-orbitron tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-fuchsia-500">
-                        AURA SYNC
-                    </h1>
-                    <p class="text-[10px] font-mono text-cyan-400/70 tracking-wider">CYBERNETIC BIOMETRIC ENGINE v2.5</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-4">
-                <!-- Local storage status indicator -->
-                <div id="storageStatus" class="bg-slate-900/80 border border-slate-800 rounded-full px-3 py-1 flex items-center gap-2 text-xs text-slate-400">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500" id="storageIndicatorDot"></span>
-                    <span class="font-mono" id="storageIndicatorText">LOCAL_STORAGE: READY</span>
-                </div>
-                <a href="#editor" class="text-xs font-mono border border-cyan-500/20 hover:border-cyan-400/80 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 px-4 py-1.5 rounded transition-all duration-300">
-                    <i class="fa-solid fa-bolt mr-1"></i> SYNC DATA
-                </a>
-            </div>
+<!-- ════════════════════════════════════════════
+     PHOTO / AI SCANNER MODAL
+════════════════════════════════════════════ -->
+<div id="photoModal" class="modal-base fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
+  <div class="bg-[#070c14] border border-cyan-500/30 rounded-2xl w-full max-w-lg relative shadow-2xl my-auto">
+    <div class="absolute top-0 left-0 w-8 h-[1px] bg-cyan-500"></div><div class="absolute top-0 left-0 w-[1px] h-8 bg-cyan-500"></div>
+    <div class="absolute bottom-0 right-0 w-8 h-[1px] bg-fuchsia-500"></div><div class="absolute bottom-0 right-0 w-[1px] h-8 bg-fuchsia-500"></div>
+    <div class="px-5 pt-5 pb-3 border-b border-slate-800 flex items-center justify-between">
+      <div>
+        <h3 class="text-sm font-orbitron font-bold text-cyan-400 tracking-widest flex items-center gap-2"><i class="fa-solid fa-camera-retro animate-pulse"></i> <span id="photoModalTitle">AI FOOD SCANNER</span></h3>
+        <p class="text-[10px] font-mono text-slate-500 mt-0.5" id="photoModalSub">PHOTO → CALORIES + MACROS</p>
+      </div>
+      <button onclick="closePhotoModal()" class="text-slate-500 hover:text-white transition-colors text-lg"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="p-5 space-y-3">
+      <!-- Drop zone -->
+      <div id="photoDropZone" onclick="document.getElementById('photoFileInput').click()"
+           class="relative border-2 border-dashed border-slate-700 hover:border-cyan-500/60 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden" style="min-height:150px;">
+        <div id="photoEmptyState" class="flex flex-col items-center gap-2 py-5">
+          <i class="fa-solid fa-bowl-food text-4xl text-slate-600"></i>
+          <p class="text-xs font-mono text-slate-400 text-center">TAP TO UPLOAD FOOD PHOTO<br><span class="text-slate-600">OR DRAG &amp; DROP</span></p>
+          <span class="text-[9px] font-mono text-slate-600">JPG / PNG / WEBP · MAX 10MB</span>
         </div>
-    </header>
-
-    <main class="relative z-10 max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8" id="editor">
-        
-        <!-- Left Side: Configurator Controls (5 Columns) -->
-        <section class="lg:col-span-5 space-y-6">
-            <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-xl relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-8 h-[1px] bg-cyan-500"></div>
-                <div class="absolute top-0 left-0 w-[1px] h-8 bg-cyan-500"></div>
-                <div class="absolute bottom-0 right-0 w-8 h-[1px] bg-fuchsia-500"></div>
-                <div class="absolute bottom-0 right-0 w-[1px] h-8 bg-fuchsia-500"></div>
-                
-                <h2 class="text-lg font-bold font-orbitron text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 mb-4 tracking-wide flex items-center justify-between">
-                    <span><i class="fa-solid fa-keyboard text-cyan-400 mr-2"></i>BIOMETRICS INPUT</span>
-                    <span class="text-xs font-mono text-slate-500">MANUAL OVERRIDE</span>
-                </h2>
-
-                <!-- Metric System Switcher -->
-                <div class="grid grid-cols-2 gap-2 p-1 bg-slate-900 rounded-lg mb-6 border border-slate-800">
-                    <button id="btnMetric" onclick="setUnitSystem('metric')" class="py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all duration-300 bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                        METRIC (KG / CM)
-                    </button>
-                    <button id="btnImperial" onclick="setUnitSystem('imperial')" class="py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all duration-300 text-slate-500 hover:text-slate-300">
-                        IMPERIAL (LBS / FT)
-                    </button>
-                </div>
-
-                <!-- Input Controls -->
-                <div class="space-y-4">
-                    <!-- Bodyweight -->
-                    <div>
-                        <label class="block text-xs font-mono text-slate-300 mb-1.5 flex items-center gap-1.5">
-                            <i class="fa-solid fa-weight-scale text-cyan-400"></i> BODYWEIGHT
-                        </label>
-                        <div class="relative">
-                            <input type="number" id="weight" step="0.1" value="72.5" oninput="updateStats(); saveToLocalStorage()" 
-                                   class="w-full bg-slate-900/60 border border-slate-800 focus:border-cyan-500/80 text-cyan-300 font-mono text-sm rounded-lg px-4 py-2.5 pr-16 focus:outline-none transition-all">
-                            <span class="absolute right-4 top-2.5 text-xs font-mono text-slate-500" id="weightUnitText">kg</span>
-                        </div>
-                    </div>
-
-                    <!-- Fat Percentage -->
-                    <div>
-                        <label class="block text-xs font-mono text-slate-300 mb-1.5 flex items-center gap-1.5">
-                            <i class="fa-solid fa-percent text-fuchsia-400"></i> BODY FAT PERCENTAGE
-                        </label>
-                        <div class="relative">
-                            <input type="number" id="fat" step="0.1" value="15.4" oninput="updateStats(); saveToLocalStorage()" 
-                                   class="w-full bg-slate-900/60 border border-slate-800 focus:border-fuchsia-500/80 text-fuchsia-300 font-mono text-sm rounded-lg px-4 py-2.5 pr-16 focus:outline-none transition-all">
-                            <span class="absolute right-4 top-2.5 text-xs font-mono text-slate-500">%</span>
-                        </div>
-                    </div>
-
-                    <!-- Muscle Mass -->
-                    <div>
-                        <label class="block text-xs font-mono text-slate-300 mb-1.5 flex items-center gap-1.5">
-                            <i class="fa-solid fa-dumbbell text-emerald-400"></i> MUSCLE MASS
-                        </label>
-                        <div class="relative">
-                            <input type="number" id="muscle" step="0.1" value="58.2" oninput="updateStats(); saveToLocalStorage()" 
-                                   class="w-full bg-slate-900/60 border border-slate-800 focus:border-emerald-500/80 text-emerald-300 font-mono text-sm rounded-lg px-4 py-2.5 pr-16 focus:outline-none transition-all">
-                            <span class="absolute right-4 top-2.5 text-xs font-mono text-slate-500" id="muscleUnitText">kg</span>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <!-- BMR -->
-                        <div>
-                            <label class="block text-xs font-mono text-slate-300 mb-1.5 flex items-center gap-1.5">
-                                <i class="fa-solid fa-fire text-amber-400"></i> METABOLISM (BMR)
-                            </label>
-                            <div class="relative">
-                                <input type="number" id="bmr" step="10" value="1745" oninput="updateStats(); saveToLocalStorage()" 
-                                       class="w-full bg-slate-900/60 border border-slate-800 focus:border-amber-500/80 text-amber-300 font-mono text-sm rounded-lg px-4 py-2.5 pr-12 focus:outline-none transition-all">
-                                <span class="absolute right-3 top-2.5 text-[9px] font-mono text-slate-500">kcal</span>
-                            </div>
-                        </div>
-
-                        <!-- Target Calorie -->
-                        <div>
-                            <label class="block text-xs font-mono text-slate-300 mb-1.5 flex items-center gap-1.5">
-                                <i class="fa-solid fa-bullseye text-teal-400"></i> CALORIE TARGET
-                            </label>
-                            <div class="relative">
-                                <input type="number" id="targetBudget" step="50" value="2000" oninput="updateStats(); saveToLocalStorage()" 
-                                       class="w-full bg-slate-900/60 border border-slate-800 focus:border-teal-500/80 text-teal-300 font-mono text-sm rounded-lg px-4 py-2.5 pr-12 focus:outline-none transition-all">
-                                <span class="absolute right-3 top-2.5 text-[9px] font-mono text-slate-500">kcal</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <!-- Visceral Fat -->
-                        <div>
-                            <label class="block text-xs font-mono text-slate-300 mb-1.5 flex items-center gap-1.5">
-                                <i class="fa-solid fa-shield-virus text-violet-400"></i> VISCERAL FAT
-                            </label>
-                            <div class="relative">
-                                <input type="number" id="visceral" step="1" value="5" oninput="updateStats(); saveToLocalStorage()" 
-                                       class="w-full bg-slate-900/60 border border-slate-800 focus:border-violet-500/80 text-violet-300 font-mono text-sm rounded-lg px-4 py-2.5 pr-12 focus:outline-none transition-all">
-                                <span class="absolute right-3 top-2.5 text-[9px] font-mono text-slate-500">LVL</span>
-                            </div>
-                        </div>
-
-                        <!-- Body Age -->
-                        <div>
-                            <label class="block text-xs font-mono text-slate-300 mb-1.5 flex items-center gap-1.5">
-                                <i class="fa-solid fa-cake-candles text-rose-400"></i> BODY AGE
-                            </label>
-                            <div class="relative">
-                                <input type="number" id="bodyAge" step="1" value="24" oninput="updateStats(); saveToLocalStorage()" 
-                                       class="w-full bg-slate-900/60 border border-slate-800 focus:border-rose-500/80 text-rose-300 font-mono text-sm rounded-lg px-4 py-2.5 pr-12 focus:outline-none transition-all">
-                                <span class="absolute right-3 top-2.5 text-[9px] font-mono text-slate-500">YRS</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Meal Tracker -->
-            <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-xl relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-8 h-[1px] bg-emerald-500"></div>
-                <div class="absolute top-0 right-0 w-[1px] h-8 bg-emerald-500"></div>
-                
-                <h3 class="text-xs font-mono text-emerald-400 tracking-widest uppercase mb-4 flex items-center justify-between">
-                    <span><i class="fa-solid fa-utensils mr-2"></i>MEAL TRACKER LOG</span>
-                    <span id="trackedMealsCount" class="text-[9px] px-2 py-0.5 rounded bg-emerald-950/50 border border-emerald-500/30 text-emerald-300">0 LOGS</span>
-                </h3>
-
-                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 mb-4">
-                    <div class="sm:col-span-7 relative">
-                        <input type="text" id="newMealName" placeholder="Meal Name (e.g., Breakfast)" 
-                               class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 text-slate-100 font-mono text-xs rounded-lg px-3 py-2 focus:outline-none">
-                    </div>
-                    <div class="sm:col-span-3 relative">
-                        <input type="number" id="newMealCals" placeholder="kcal" min="0" 
-                               class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 text-slate-100 font-mono text-xs rounded-lg px-3 py-2 pr-6 focus:outline-none">
-                    </div>
-                    <div class="sm:col-span-2">
-                        <button onclick="addMealItem()" class="w-full bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/40 text-emerald-300 rounded-lg py-2 text-xs font-bold transition-all flex items-center justify-center">
-                            <i class="fa-solid fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div id="mealListContainer" class="max-h-[140px] overflow-y-auto space-y-2 mb-4 pr-1">
-                    <div class="text-center py-4 text-[10px] font-mono text-slate-600 border border-dashed border-slate-900 rounded-lg">
-                        NO MEALS RECORDED. SYNC ACTIVE BUDGET.
-                    </div>
-                </div>
-
-                <div class="border-t border-slate-900 pt-3 flex items-center justify-between text-xs font-mono text-slate-400">
-                    <div>
-                        <span>TOTAL CALORIES:</span>
-                        <span id="sumTotalCals" class="text-emerald-400 font-bold ml-1">0 kcal</span>
-                    </div>
-                    <div>
-                        <span>DEFICIT REMAINING:</span>
-                        <span id="netRemainingCals" class="text-teal-400 font-bold ml-1">2,000 kcal</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Customization Panel -->
-            <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-xl relative overflow-hidden">
-                <h3 class="text-xs font-mono text-slate-400 tracking-widest uppercase mb-4">Aesthetics & Card Settings</h3>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-mono text-slate-300 mb-1.5">SUBJECT IDENTIFICATION</label>
-                        <div class="relative">
-                            <input type="text" id="subjectName" value="AGENT_NEO" oninput="updateStats(); saveToLocalStorage()" 
-                                   class="w-full bg-slate-900/60 border border-slate-800 focus:border-cyan-500/80 text-cyan-300 placeholder-slate-700 font-mono text-sm rounded-lg px-4 py-2 pl-10 focus:outline-none transition-all">
-                            <i class="fa-solid fa-user-astronaut absolute left-3.5 top-3 text-slate-600 text-xs"></i>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-mono text-slate-300 mb-1.5">CARD TEMPLATE LAYOUT</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button id="btnRatio11" onclick="changeAspect('1:1')" class="py-2 px-3 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono text-xs text-center flex items-center justify-center gap-2">
-                                <i class="fa-regular fa-square"></i> SQ FEED (1:1)
-                            </button>
-                            <button id="btnRatio916" onclick="changeAspect('9:16')" class="py-2 px-3 rounded bg-slate-900 text-slate-500 border border-slate-800 hover:text-slate-300 font-mono text-xs text-center flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-mobile-screen"></i> STORIES (9:16)
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-mono text-slate-300 mb-1.5">ENERGY SPECTRUM (THEME)</label>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button onclick="setTheme('cyberpunk')" class="p-2 rounded bg-slate-900 border border-pink-500/20 text-pink-400 text-xs font-mono hover:bg-slate-850 flex flex-col items-center gap-1">
-                                <span class="w-3 h-3 rounded-full bg-gradient-to-r from-pink-500 to-cyan-400"></span>
-                                CYBERPUNK
-                            </button>
-                            <button onclick="setTheme('quantum')" class="p-2 rounded bg-slate-900 border border-emerald-500/20 text-emerald-400 text-xs font-mono hover:bg-slate-850 flex flex-col items-center gap-1">
-                                <span class="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400"></span>
-                                QUANTUM
-                            </button>
-                            <button onclick="setTheme('solar')" class="p-2 rounded bg-slate-900 border border-amber-500/20 text-amber-400 text-xs font-mono hover:bg-slate-850 flex flex-col items-center gap-1">
-                                <span class="w-3 h-3 rounded-full bg-gradient-to-r from-amber-500 to-rose-500"></span>
-                                SOLAR FLARE
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Panel -->
-            <div class="flex flex-col gap-3">
-                <button onclick="triggerHologramScan()" class="w-full bg-gradient-to-r from-cyan-500 via-blue-600 to-fuchsia-600 hover:from-cyan-400 hover:via-blue-500 hover:to-fuchsia-500 text-white font-orbitron font-bold py-4 rounded-xl shadow-lg hover:shadow-cyan-500/30 transition-all duration-300 flex items-center justify-center gap-3 tracking-widest text-sm border-t border-white/20">
-                    <i class="fa-solid fa-network-wired animate-pulse"></i> INITIATE MATRIX SYNC
-                </button>
-                
-                <button onclick="exportCard()" class="w-full bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-200 font-mono py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-xs">
-                    <i class="fa-solid fa-download"></i> EXPORT TO HI-RES SOCIAL IMAGE (PNG)
-                </button>
-
-                <!-- Local Data Management -->
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="saveToLocalStorage(true)" class="bg-slate-900 hover:bg-emerald-950/40 border border-emerald-800/40 hover:border-emerald-500/50 text-emerald-400/70 hover:text-emerald-300 font-mono py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-xs">
-                        <i class="fa-solid fa-floppy-disk"></i> SAVE LOCAL
-                    </button>
-                    <button onclick="clearLocalStorage()" class="bg-slate-900 hover:bg-rose-950/40 border border-rose-900/40 hover:border-rose-500/50 text-rose-500/60 hover:text-rose-400 font-mono py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-xs">
-                        <i class="fa-solid fa-trash-can"></i> CLEAR DATA
-                    </button>
-                </div>
-
-                <!-- Last saved timestamp -->
-                <p class="text-center text-[9px] font-mono text-slate-600" id="lastSavedText">LAST SAVE: —</p>
-            </div>
-        </section>
-
-        <!-- Right Side: Live Preview Card -->
-        <section class="lg:col-span-7 flex flex-col items-center justify-start gap-4">
-            
-            <div class="flex items-center justify-between w-full max-w-[500px]">
-                <h3 class="text-xs font-mono text-cyan-400 tracking-widest uppercase">
-                    <i class="fa-solid fa-display mr-1"></i> HOLO-PREVIEW MONITOR
-                </h3>
-                <span class="text-[10px] font-mono text-slate-500">ACTIVE RENDER FRAME</span>
-            </div>
-
-            <div id="exportContainer" class="p-4 bg-[#05080e] rounded-3xl border border-slate-950 flex items-center justify-center shadow-2xl relative overflow-hidden">
-                
-                <div id="shareCard" class="relative overflow-hidden flex flex-col font-sans grid-bg select-none transition-all duration-500 ease-in-out border-2" 
-                     style="width: 480px; min-height: 480px; background-color: #060a12; border-color: rgba(6, 182, 212, 0.25);">
-                    
-                    <div id="scanningBar" class="scanning-bar absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent z-20 pointer-events-none" style="top: 0;"></div>
-                    <div class="absolute inset-0 scanline pointer-events-none opacity-[0.15] z-10"></div>
-                    
-                    <!-- TOP PROFILE CORNER HUD -->
-                    <div class="p-6 relative z-10 flex justify-between items-start">
-                        <div>
-                            <div class="flex items-center gap-2.5 mb-1.5">
-                                <div class="w-2.5 h-2.5 bg-cyan-400 animate-pulse rounded-full" id="themeDot"></div>
-                                <span class="font-mono text-xs font-bold tracking-widest text-cyan-400" id="cardSubject">AGENT_NEO</span>
-                                <span class="text-[9px] font-mono text-slate-500 px-1.5 py-0.5 bg-slate-900 border border-slate-800 rounded">SYS_LVL_7</span>
-                            </div>
-                            <h2 class="text-xl font-orbitron font-black text-white tracking-wider flex items-center gap-1.5 leading-none">
-                                BIOMETRICS SCAN
-                            </h2>
-                            <p class="text-[10px] font-mono text-slate-400 mt-1 uppercase" id="cardDate">SYNC: 2026.05.31_08:58</p>
-                        </div>
-                        
-                        <div class="text-right font-mono text-[9px] text-slate-500 leading-normal">
-                            <div>SEC_SECURE // AURA_S_V2</div>
-                            <div>LOC_SYNC_09 // OK</div>
-                            <div class="text-cyan-400/80" id="sysThemeText">SPECTRUM: CYBERPUNK</div>
-                        </div>
-                    </div>
-
-                    <!-- MIDDLE SECTION: GAUGES -->
-                    <div class="px-6 py-4 flex items-center justify-around gap-4 relative z-10">
-                        
-                        <!-- Weight Gauge -->
-                        <div class="relative flex flex-col items-center justify-center">
-                            <div class="relative w-36 h-36 flex items-center justify-center">
-                                <svg class="absolute inset-0 transform -rotate-90" viewBox="0 0 100 100">
-                                    <circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="2" fill="transparent" class="text-slate-800" />
-                                    <circle id="weightRing" cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4.5" fill="transparent" class="text-cyan-400 filter drop-shadow-[0_0_4px_rgba(6,182,212,0.8)]" stroke-dasharray="276" stroke-dashoffset="100" />
-                                </svg>
-                                <div class="text-center z-10">
-                                    <p class="text-[9px] font-mono tracking-widest text-slate-400 uppercase leading-none">WEIGHT</p>
-                                    <p class="text-2xl font-black font-orbitron mt-1 text-white leading-none tracking-tight" id="cardWeight">72.5</p>
-                                    <p class="text-[10px] font-mono text-cyan-400 mt-1 leading-none font-bold" id="cardWeightUnit">KG</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Body Fat Gauge -->
-                        <div class="relative flex flex-col items-center justify-center">
-                            <div class="relative w-36 h-36 flex items-center justify-center">
-                                <svg class="absolute inset-0 transform -rotate-90" viewBox="0 0 100 100">
-                                    <circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="2" fill="transparent" class="text-slate-800" />
-                                    <circle id="fatRing" cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4.5" fill="transparent" class="text-pink-500 filter drop-shadow-[0_0_4px_rgba(236,72,153,0.8)]" stroke-dasharray="276" stroke-dashoffset="180" />
-                                </svg>
-                                <div class="text-center z-10">
-                                    <p class="text-[9px] font-mono tracking-widest text-slate-400 uppercase leading-none">BODY FAT</p>
-                                    <p class="text-2xl font-black font-orbitron mt-1 text-white leading-none tracking-tight" id="cardFat">15.4</p>
-                                    <p class="text-[10px] font-mono text-pink-500 mt-1 leading-none font-bold">%</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- BOTTOM GRID: TELEMETRY DATA -->
-                    <div class="p-6 relative z-10">
-                        <div class="relative h-[1px] bg-slate-800 mb-5 flex items-center justify-between">
-                            <div class="w-1.5 h-1.5 bg-cyan-400 rounded-sm -mt-0.5"></div>
-                            <div class="text-[8px] font-mono text-slate-400 bg-slate-950 px-2 uppercase tracking-widest">AUXILIARY INDEXES</div>
-                            <div class="w-1.5 h-1.5 bg-fuchsia-400 rounded-sm -mt-0.5"></div>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-3">
-                            <div class="bg-slate-900/40 border border-slate-800/80 p-2 rounded-lg text-center relative overflow-hidden group">
-                                <div class="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                <span class="text-[8px] font-mono text-slate-400 block tracking-wider mb-1 uppercase">MUSCLE</span>
-                                <span class="text-sm font-bold font-orbitron text-emerald-400 block" id="cardMuscle">58.2</span>
-                                <span class="text-[8px] font-mono text-slate-500 block uppercase" id="cardMuscleUnit">KG</span>
-                            </div>
-
-                            <div class="bg-slate-900/40 border border-slate-800/80 p-2 rounded-lg text-center relative overflow-hidden group">
-                                <div class="absolute inset-0 bg-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                <span class="text-[8px] font-mono text-slate-400 block tracking-wider mb-1 uppercase">METABOLISM</span>
-                                <span class="text-sm font-bold font-orbitron text-amber-400 block" id="cardBmr">1745</span>
-                                <span class="text-[8px] font-mono text-slate-500 block uppercase">KCAL</span>
-                            </div>
-
-                            <div class="bg-slate-900/40 border border-slate-800/80 p-2 rounded-lg text-center relative overflow-hidden group">
-                                <div class="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                <span class="text-[8px] font-mono text-slate-400 block tracking-wider mb-1 uppercase">LOGGED INTAKE</span>
-                                <span class="text-sm font-bold font-orbitron text-emerald-400 block" id="cardTotalIntake">0</span>
-                                <span class="text-[8px] font-mono text-slate-500 block uppercase">KCAL</span>
-                            </div>
-
-                            <div class="bg-slate-900/40 border border-slate-800/80 p-2 rounded-lg text-center relative overflow-hidden group">
-                                <div class="absolute inset-0 bg-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                <span class="text-[8px] font-mono text-slate-400 block tracking-wider mb-1 uppercase">VISCERAL</span>
-                                <span class="text-sm font-bold font-orbitron text-violet-400 block" id="cardVisceral">5</span>
-                                <span class="text-[8px] font-mono text-slate-500 block uppercase">LEVEL</span>
-                            </div>
-
-                            <div class="bg-slate-900/40 border border-slate-800/80 p-2 rounded-lg text-center relative overflow-hidden group">
-                                <div class="absolute inset-0 bg-rose-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                <span class="text-[8px] font-mono text-slate-400 block tracking-wider mb-1 uppercase">BODY AGE</span>
-                                <span class="text-sm font-bold font-orbitron text-rose-400 block" id="cardBodyAge">24</span>
-                                <span class="text-[8px] font-mono text-slate-500 block uppercase">YEARS</span>
-                            </div>
-
-                            <div class="bg-slate-900/40 border border-slate-800/80 p-2 rounded-lg text-center relative overflow-hidden group">
-                                <div class="absolute inset-0 bg-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                <span class="text-[8px] font-mono text-slate-400 block tracking-wider mb-1 uppercase" id="deficitLabel">DEFICIT REMAIN</span>
-                                <span class="text-sm font-bold font-orbitron block" id="cardBudgetLeft">2000</span>
-                                <span class="text-[8px] font-mono text-slate-500 block uppercase" id="deficitUnit">KCAL LEFT</span>
-                            </div>
-                        </div>
-
-                        <!-- Meal Feed -->
-                        <div class="mt-4 bg-slate-950/60 border border-slate-900 p-2.5 rounded-lg">
-                            <div class="flex items-center justify-between text-[8px] font-mono text-slate-500 mb-1.5">
-                                <span class="text-cyan-400/80"><i class="fa-solid fa-server mr-1"></i> MEALS_TELEMETRY_FEED:</span>
-                                <span id="cardMealsCount">0 ACTIVE LOGS</span>
-                            </div>
-                            <div id="cardMealFeed" class="text-[9px] font-mono text-slate-400 space-y-1 max-h-[120px] overflow-y-auto pr-0.5">
-                                <div class="text-slate-600 italic">> NO LOCAL MEALS SYNCHRONIZED...</div>
-                            </div>
-                        </div>
-
-                        <div class="mt-4 flex justify-between items-center text-[9px] font-mono text-slate-500">
-                            <span>AURA_HEALTH_PROTOCOL_INITIATED</span>
-                            <span>DECIBEL RATIO: N/A</span>
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
-
-            <!-- Toast Notification -->
-            <div id="toastNotification" class="w-full max-w-[480px] bg-slate-950 border border-cyan-500/30 text-cyan-300 font-mono text-xs px-4 py-3 rounded-xl flex items-center justify-between shadow-neon-cyan/10 opacity-0 transition-opacity duration-300 pointer-events-none">
-                <span id="toastMsg"><i class="fa-solid fa-microchip mr-2 animate-spin"></i> GENERATING PNG RENDER...</span>
-                <i class="fa-solid fa-xmark cursor-pointer hover:text-white" onclick="hideToast()"></i>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Guide Section -->
-    <section class="max-w-7xl mx-auto px-4 py-12 relative z-10">
-        <div class="border-t border-slate-900 pt-10">
-            <h3 class="text-sm font-mono text-cyan-400 tracking-wider mb-6">INTELLIGENT DIAGNOSTIC FRAMEWORK GUIDE</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-slate-400 text-xs leading-relaxed">
-                <div class="bg-slate-950/40 p-5 rounded-xl border border-slate-900">
-                    <h4 class="font-orbitron font-bold text-white text-sm mb-2 text-cyan-400">1. INPUT DATA</h4>
-                    <p>Adjust weight, fat, muscle, BMR, visceral fat, and body age on the sidebar. Select your name or pseudonym to tag your scan output.</p>
-                </div>
-                <div class="bg-slate-950/40 p-5 rounded-xl border border-slate-900">
-                    <h4 class="font-orbitron font-bold text-white text-sm mb-2 text-fuchsia-400">2. STYLE THE THEME</h4>
-                    <p>Cycle between dynamic cybernetic colors, choose portrait format (Stories) or square format (Instagram Feed), and hit 'Matrix Sync' to lock metrics.</p>
-                </div>
-                <div class="bg-slate-950/40 p-5 rounded-xl border border-slate-900">
-                    <h4 class="font-orbitron font-bold text-white text-sm mb-2 text-emerald-400">3. DATA PERSISTS LOCALLY</h4>
-                    <p>All biometric entries and meal logs are auto-saved to your browser's local storage. Your data never leaves your device — no server, no cloud, no account needed.</p>
-                </div>
-            </div>
+        <div id="photoPreviewState" class="hidden w-full relative">
+          <img id="photoPreviewImg" src="" alt="" class="w-full rounded-lg" style="max-height:200px;object-fit:contain"/>
+          <div id="photoScanOverlay" class="hidden absolute inset-0 rounded-lg overflow-hidden pointer-events-none">
+            <div class="ai-scan-line absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent"></div>
+            <div class="absolute inset-0 bg-cyan-900/10"></div>
+          </div>
         </div>
-    </section>
-
-    <footer class="bg-slate-950/90 border-t border-slate-900 py-8 relative z-10">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-500">
-            <p>© 2026 AURA SYNC SYSTEMS INC. GENERAL PUBLIC HEALTH PROTOCOL ACCESS.</p>
-            <p>DESIGNED FOR THE NEXT METABOLIC ERA // DATA STORED SECURELY LOCALLY</p>
+        <input type="file" id="photoFileInput" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)"/>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="document.getElementById('photoFileInput').click()" class="py-2 text-xs font-mono border border-slate-700 hover:border-cyan-500/50 text-slate-400 hover:text-cyan-300 rounded-lg transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-folder-open"></i> BROWSE</button>
+        <button onclick="triggerCamera()" class="py-2 text-xs font-mono border border-slate-700 hover:border-fuchsia-500/50 text-slate-400 hover:text-fuchsia-300 rounded-lg transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-camera"></i> CAMERA</button>
+      </div>
+      <!-- Only shown in "add meal" mode, hidden in "attach photo" mode -->
+      <div id="photoNewMealFields">
+        <div class="grid grid-cols-4 gap-1.5 mb-2">
+          <button onclick="setPhotoCategory('breakfast')" id="photoCatBreakfast" class="py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono text-[9px] text-center transition-all">🌅 BFAST</button>
+          <button onclick="setPhotoCategory('lunch')"     id="photoCatLunch"     class="py-1.5 rounded-lg bg-slate-900 text-slate-500 border border-slate-800 font-mono text-[9px] text-center transition-all">☀️ LUNCH</button>
+          <button onclick="setPhotoCategory('dinner')"    id="photoCatDinner"    class="py-1.5 rounded-lg bg-slate-900 text-slate-500 border border-slate-800 font-mono text-[9px] text-center transition-all">🌙 DINNER</button>
+          <button onclick="setPhotoCategory('snacks')"    id="photoCatSnacks"    class="py-1.5 rounded-lg bg-slate-900 text-slate-500 border border-slate-800 font-mono text-[9px] text-center transition-all">⚡ SNACKS</button>
         </div>
-    </footer>
+        <input type="text" id="photoMealNameOverride" placeholder="Meal label (auto-filled by AI)..."
+               class="w-full bg-slate-900 border border-slate-800 focus:border-cyan-500 text-slate-200 font-mono text-xs rounded-lg px-3 py-2 focus:outline-none mb-2"/>
+      </div>
+      <!-- AI result -->
+      <div id="aiResultPanel" class="hidden bg-slate-900/60 border border-emerald-500/20 rounded-xl p-3 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-mono text-emerald-400"><i class="fa-solid fa-microchip mr-1"></i> AI RESULT</span>
+          <span id="aiConfidenceBadge" class="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-950/50 border border-emerald-500/30 text-emerald-300"></span>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="bg-slate-950/60 rounded-lg p-2 text-center">
+            <p class="text-[8px] font-mono text-slate-500 uppercase mb-0.5">FOOD</p>
+            <p class="text-xs font-orbitron font-bold text-white leading-tight" id="aiDetectedFood">—</p>
+            <p class="text-[8px] font-mono text-slate-500 mt-0.5" id="aiServingNote">—</p>
+          </div>
+          <div class="bg-slate-950/60 rounded-lg p-2 text-center">
+            <p class="text-[8px] font-mono text-slate-500 uppercase mb-0.5">KCAL</p>
+            <p class="text-xl font-orbitron font-black text-emerald-400 leading-none" id="aiDetectedCals">—</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-4 gap-1.5">
+          <div class="bg-slate-950/40 rounded-lg p-1.5 text-center border border-blue-500/15"><p class="text-[7px] font-mono text-blue-400/80 uppercase">PRO</p><p class="text-sm font-orbitron font-bold text-blue-400" id="aiProtein">—</p><p class="text-[7px] font-mono text-slate-600">g</p></div>
+          <div class="bg-slate-950/40 rounded-lg p-1.5 text-center border border-amber-500/15"><p class="text-[7px] font-mono text-amber-400/80 uppercase">CARB</p><p class="text-sm font-orbitron font-bold text-amber-400" id="aiCarbs">—</p><p class="text-[7px] font-mono text-slate-600">g</p></div>
+          <div class="bg-slate-950/40 rounded-lg p-1.5 text-center border border-rose-500/15"><p class="text-[7px] font-mono text-rose-400/80 uppercase">FAT</p><p class="text-sm font-orbitron font-bold text-rose-400" id="aiFat">—</p><p class="text-[7px] font-mono text-slate-600">g</p></div>
+          <div class="bg-slate-950/40 rounded-lg p-1.5 text-center border border-emerald-500/15"><p class="text-[7px] font-mono text-emerald-400/80 uppercase">FIBER</p><p class="text-sm font-orbitron font-bold text-emerald-400" id="aiFiber">—</p><p class="text-[7px] font-mono text-slate-600">g</p></div>
+        </div>
+        <p class="text-[9px] font-mono text-slate-400 bg-slate-950/40 rounded p-1.5" id="aiBreakdownNote">—</p>
+        <div class="flex items-center gap-2">
+          <label class="text-[9px] font-mono text-slate-400 shrink-0">ADJUST KCAL:</label>
+          <input type="number" id="aiCalOverride" min="0" step="10" class="flex-1 bg-slate-900 border border-slate-800 focus:border-emerald-500 text-emerald-300 font-mono text-sm rounded-lg px-3 py-1.5 focus:outline-none"/>
+        </div>
+      </div>
+      <div id="photoStatusBar" class="hidden text-center py-2">
+        <p class="text-xs font-mono text-cyan-400 animate-pulse" id="photoStatusText"></p>
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button id="btnScanPhoto" onclick="scanPhotoCalories()" disabled
+                class="flex-1 bg-gradient-to-r from-cyan-600 to-fuchsia-600 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-white font-orbitron font-bold py-2.5 rounded-xl transition-all text-xs tracking-wider disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          <i class="fa-solid fa-bolt"></i> <span id="btnScanLabel">ANALYZE</span>
+        </button>
+        <button id="btnLogDetected" onclick="commitPhotoAction()" disabled
+                class="flex-1 bg-emerald-500/20 disabled:bg-slate-900 border border-emerald-500/30 disabled:border-slate-800 text-emerald-300 disabled:text-slate-600 font-orbitron font-bold py-2.5 rounded-xl transition-all text-xs tracking-wider disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          <i class="fa-solid fa-circle-plus"></i> <span id="btnLogLabel">LOG MEAL</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <script>
-        // ─── CONSTANTS ────────────────────────────────────────────────────────────
-        const STORAGE_KEY = 'aura_sync_v1';
+<!-- ════════════════════════════════════════════
+     HISTORY / DAY BROWSER MODAL
+════════════════════════════════════════════ -->
+<div id="historyModal" class="modal-base fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
+  <div class="bg-[#070c14] border border-violet-500/30 rounded-2xl w-full max-w-xl relative shadow-2xl my-auto">
+    <div class="absolute top-0 left-0 w-8 h-[1px] bg-violet-500"></div><div class="absolute top-0 left-0 w-[1px] h-8 bg-violet-500"></div>
+    <div class="px-5 pt-5 pb-3 border-b border-slate-800 flex items-center justify-between">
+      <div>
+        <h3 class="text-sm font-orbitron font-bold text-violet-400 tracking-widest"><i class="fa-solid fa-calendar-days mr-2"></i>DAY HISTORY</h3>
+        <p class="text-[10px] font-mono text-slate-500 mt-0.5">BROWSE · VIEW · EDIT PAST ENTRIES</p>
+      </div>
+      <button onclick="closeHistoryModal()" class="text-slate-500 hover:text-white transition-colors text-lg"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="p-5">
+      <div id="historyList" class="space-y-1.5 max-h-[60vh] overflow-y-auto pr-1"></div>
+      <p id="historyEmpty" class="hidden text-center py-8 text-[10px] font-mono text-slate-600">NO HISTORY FOUND. START LOGGING TO BUILD YOUR RECORD.</p>
+    </div>
+  </div>
+</div>
 
-        // ─── STATE ────────────────────────────────────────────────────────────────
-        let unitSystem   = 'metric';
-        let currentTheme = 'cyberpunk';
-        let currentAspect = '1:1';
-        let loggedMeals  = [];
+<!-- ════════════════════════════════════════════
+     HEADER
+════════════════════════════════════════════ -->
+<header class="relative z-10 border-b border-cyan-950/60 bg-slate-950/60 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="relative h-9 w-9 flex items-center justify-center bg-cyan-950/50 border border-cyan-500/30 rounded-lg">
+        <i class="fa-solid fa-fingerprint text-cyan-400 text-lg animate-pulse"></i>
+        <div class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-pink-500 rounded-full"></div>
+      </div>
+      <div>
+        <h1 class="text-lg font-black font-orbitron tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-fuchsia-500">AURA SYNC</h1>
+        <p class="text-[9px] font-mono text-cyan-400/60 tracking-wider">BIOMETRIC JOURNAL v4 // DAILY TRACKING + STREAK ENGINE</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap justify-center">
+      <!-- Streak badge -->
+      <div class="flex items-center gap-1.5 bg-orange-950/40 border border-orange-500/30 rounded-full px-3 py-1">
+        <i class="fa-solid fa-fire flame-icon text-orange-400 text-sm"></i>
+        <span class="font-orbitron font-bold text-orange-300 text-sm" id="streakCount">0</span>
+        <span class="font-mono text-[9px] text-orange-400/70">DAY STREAK</span>
+      </div>
+      <!-- Date display + nav -->
+      <div class="flex items-center gap-1 bg-slate-900/80 border border-slate-800 rounded-lg overflow-hidden">
+        <button onclick="navigateDay(-1)" class="px-2 py-1.5 hover:bg-slate-800 text-slate-400 hover:text-white transition-all text-xs"><i class="fa-solid fa-chevron-left"></i></button>
+        <span class="font-mono text-xs text-cyan-300 px-2 py-1.5 min-w-[110px] text-center" id="currentDateDisplay">TODAY</span>
+        <button onclick="navigateDay(1)" id="btnNextDay" class="px-2 py-1.5 hover:bg-slate-800 text-slate-400 hover:text-white transition-all text-xs disabled:opacity-30 disabled:cursor-not-allowed"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+      <button onclick="openHistoryModal()" class="text-xs font-mono border border-violet-500/30 hover:border-violet-400/60 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 px-3 py-1.5 rounded-lg transition-all"><i class="fa-solid fa-clock-rotate-left mr-1"></i> HISTORY</button>
+      <button onclick="saveCurrentDay(true)" class="text-xs font-mono border border-cyan-500/20 hover:border-cyan-400/80 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 px-3 py-1.5 rounded-lg transition-all"><i class="fa-solid fa-floppy-disk mr-1"></i> SAVE</button>
+    </div>
+  </div>
+</header>
 
-        // ─── DOM REFS ─────────────────────────────────────────────────────────────
-        const weightInput      = document.getElementById('weight');
-        const fatInput         = document.getElementById('fat');
-        const muscleInput      = document.getElementById('muscle');
-        const bmrInput         = document.getElementById('bmr');
-        const targetBudgetInput= document.getElementById('targetBudget');
-        const visceralInput    = document.getElementById('visceral');
-        const bodyAgeInput     = document.getElementById('bodyAge');
-        const subjectNameInput = document.getElementById('subjectName');
-        const cardSubject      = document.getElementById('cardSubject');
-        const cardDate         = document.getElementById('cardDate');
-        const cardWeight       = document.getElementById('cardWeight');
-        const cardWeightUnit   = document.getElementById('cardWeightUnit');
-        const cardFat          = document.getElementById('cardFat');
-        const cardMuscle       = document.getElementById('cardMuscle');
-        const cardMuscleUnit   = document.getElementById('cardMuscleUnit');
-        const cardBmr          = document.getElementById('cardBmr');
-        const cardVisceral     = document.getElementById('cardVisceral');
-        const cardBodyAge      = document.getElementById('cardBodyAge');
-        const cardTotalIntake  = document.getElementById('cardTotalIntake');
-        const cardBudgetLeft   = document.getElementById('cardBudgetLeft');
-        const deficitLabel     = document.getElementById('deficitLabel');
-        const deficitUnit      = document.getElementById('deficitUnit');
-        const weightRing       = document.getElementById('weightRing');
-        const fatRing          = document.getElementById('fatRing');
+<!-- ════════════════════════════════════════════
+     MAIN
+════════════════════════════════════════════ -->
+<main class="relative z-10 max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6" id="editor">
 
-        // ─── LOCAL STORAGE ────────────────────────────────────────────────────────
+  <!-- ══ LEFT: CONTROLS (5 cols) ══ -->
+  <section class="lg:col-span-5 space-y-5">
 
-        /**
-         * Persist all current state to localStorage.
-         * @param {boolean} [explicit=false] - If true, show a confirmation toast.
-         */
-        function saveToLocalStorage(explicit = false) {
-            try {
-                const data = {
-                    unitSystem,
-                    currentTheme,
-                    currentAspect,
-                    loggedMeals,
-                    savedAt: new Date().toISOString(),
-                    fields: {
-                        weight:       weightInput.value,
-                        fat:          fatInput.value,
-                        muscle:       muscleInput.value,
-                        bmr:          bmrInput.value,
-                        targetBudget: targetBudgetInput.value,
-                        visceral:     visceralInput.value,
-                        bodyAge:      bodyAgeInput.value,
-                        subjectName:  subjectNameInput.value,
-                    }
-                };
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-                updateStorageStatus(true, data.savedAt);
-                if (explicit) {
-                    showToast("<i class='fa-solid fa-floppy-disk text-emerald-400 mr-2'></i> DATA SAVED TO LOCAL STORAGE SUCCESSFULLY.");
-                }
-            } catch (e) {
-                updateStorageStatus(false);
-                if (explicit) {
-                    showToast("<i class='fa-solid fa-triangle-exclamation text-rose-500 mr-2'></i> LOCAL STORAGE WRITE FAILED.");
-                }
-            }
-        }
+    <!-- BIOMETRICS -->
+    <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-xl relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-8 h-[1px] bg-cyan-500"></div><div class="absolute top-0 left-0 w-[1px] h-8 bg-cyan-500"></div>
+      <div class="absolute bottom-0 right-0 w-8 h-[1px] bg-fuchsia-500"></div><div class="absolute bottom-0 right-0 w-[1px] h-8 bg-fuchsia-500"></div>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-sm font-bold font-orbitron text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 tracking-wide flex items-center gap-2"><i class="fa-solid fa-keyboard text-cyan-400"></i>BIOMETRICS</h2>
+        <div class="flex items-center gap-2">
+          <span id="viewingBadge" class="hidden text-[9px] font-mono px-2 py-0.5 rounded bg-violet-950/50 border border-violet-500/30 text-violet-300"><i class="fa-solid fa-eye mr-1"></i>VIEWING PAST</span>
+          <span class="text-[9px] font-mono text-slate-500">MIFFLIN-ST JEOR</span>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2 p-1 bg-slate-900 rounded-lg mb-4 border border-slate-800">
+        <button id="btnMetric" onclick="setUnitSystem('metric')" class="py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">METRIC (KG/CM)</button>
+        <button id="btnImperial" onclick="setUnitSystem('imperial')" class="py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all text-slate-500 hover:text-slate-300">IMPERIAL (LBS/FT)</button>
+      </div>
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-[10px] font-mono text-slate-400 mb-1 flex items-center gap-1"><i class="fa-solid fa-weight-scale text-cyan-400"></i> WEIGHT</label><div class="relative"><input type="number" id="weight" step="0.1" value="72.5" oninput="updateAll()" class="w-full bg-slate-900/60 border border-slate-800 focus:border-cyan-500/80 text-cyan-300 font-mono text-sm rounded-lg px-3 py-2 pr-10 focus:outline-none transition-all"><span class="absolute right-2.5 top-2 text-[10px] font-mono text-slate-500" id="weightUnitText">kg</span></div></div>
+          <div><label class="block text-[10px] font-mono text-slate-400 mb-1 flex items-center gap-1"><i class="fa-solid fa-ruler-vertical text-sky-400"></i> HEIGHT</label><div class="relative"><input type="number" id="height" step="0.5" value="175" oninput="updateAll()" class="w-full bg-slate-900/60 border border-slate-800 focus:border-sky-500/80 text-sky-300 font-mono text-sm rounded-lg px-3 py-2 pr-10 focus:outline-none transition-all"><span class="absolute right-2.5 top-2 text-[10px] font-mono text-slate-500" id="heightUnitText">cm</span></div></div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div><label class="block text-[10px] font-mono text-slate-400 mb-1"><i class="fa-solid fa-calendar text-violet-400 mr-0.5"></i> AGE</label><input type="number" id="age" step="1" value="25" oninput="updateAll()" class="w-full bg-slate-900/60 border border-slate-800 focus:border-violet-500/80 text-violet-300 font-mono text-sm rounded-lg px-3 py-2 focus:outline-none transition-all"></div>
+          <div><label class="block text-[10px] font-mono text-slate-400 mb-1"><i class="fa-solid fa-venus-mars text-pink-400 mr-0.5"></i> SEX</label><select id="sex" onchange="updateAll()" class="w-full bg-slate-900/60 border border-slate-800 focus:border-pink-500/80 text-pink-300 font-mono text-sm rounded-lg px-2 py-2 focus:outline-none transition-all"><option value="male">MALE</option><option value="female">FEMALE</option></select></div>
+          <div><label class="block text-[10px] font-mono text-slate-400 mb-1"><i class="fa-solid fa-cake-candles text-rose-400 mr-0.5"></i> BODY AGE</label><input type="number" id="bodyAge" step="1" value="24" oninput="updateAll()" class="w-full bg-slate-900/60 border border-slate-800 focus:border-rose-500/80 text-rose-300 font-mono text-sm rounded-lg px-3 py-2 focus:outline-none transition-all"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-[10px] font-mono text-slate-400 mb-1"><i class="fa-solid fa-percent text-fuchsia-400 mr-0.5"></i> BODY FAT %</label><div class="relative"><input type="number" id="fat" step="0.1" value="15.4" oninput="updateAll()" class="w-full bg-slate-900/60 border border-slate-800 focus:border-fuchsia-500/80 text-fuchsia-300 font-mono text-sm rounded-lg px-3 py-2 pr-7 focus:outline-none transition-all"><span class="absolute right-2.5 top-2 text-[10px] font-mono text-slate-500">%</span></div></div>
+          <div><label class="block text-[10px] font-mono text-slate-400 mb-1"><i class="fa-solid fa-dumbbell text-emerald-400 mr-0.5"></i> MUSCLE MASS</label><div class="relative"><input type="number" id="muscle" step="0.1" value="58.2" oninput="updateAll()" class="w-full bg-slate-900/60 border border-slate-800 focus:border-emerald-500/80 text-emerald-300 font-mono text-sm rounded-lg px-3 py-2 pr-10 focus:outline-none transition-all"><span class="absolute right-2.5 top-2 text-[10px] font-mono text-slate-500" id="muscleUnitText">kg</span></div></div>
+        </div>
+        <div><label class="block text-[10px] font-mono text-slate-400 mb-1"><i class="fa-solid fa-shield-virus text-violet-400 mr-0.5"></i> VISCERAL FAT LEVEL</label><input type="number" id="visceral" step="1" value="5" oninput="updateAll()" class="w-full bg-slate-900/60 border border-slate-800 focus:border-violet-500/80 text-violet-300 font-mono text-sm rounded-lg px-3 py-2 focus:outline-none transition-all"></div>
+        <div><label class="block text-[10px] font-mono text-slate-400 mb-1"><i class="fa-solid fa-user-astronaut text-cyan-400 mr-0.5"></i> SUBJECT ID</label><input type="text" id="subjectName" value="AGENT_NEO" oninput="updateAll()" class="w-full bg-slate-900/60 border border-slate-800 focus:border-cyan-500/80 text-cyan-300 font-mono text-sm rounded-lg px-3 py-2 focus:outline-none transition-all"></div>
+      </div>
+    </div>
 
-        /** Load state from localStorage and restore the UI. */
-        function loadFromLocalStorage() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (!raw) return false;
+    <!-- TARGETS ENGINE -->
+    <div class="bg-slate-950/80 border border-amber-500/20 rounded-2xl p-5 backdrop-blur-xl relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-8 h-[1px] bg-amber-500"></div><div class="absolute top-0 left-0 w-[1px] h-8 bg-amber-500"></div>
+      <h3 class="text-xs font-mono text-amber-400 tracking-widest uppercase mb-3 flex items-center justify-between"><span><i class="fa-solid fa-bullseye mr-2"></i>TARGETS ENGINE</span><span class="text-[9px] px-2 py-0.5 rounded bg-amber-950/50 border border-amber-500/30 text-amber-300">TDEE AUTO-CALC</span></h3>
+      <div class="mb-3">
+        <label class="block text-[10px] font-mono text-slate-300 mb-1.5">ACTIVITY LEVEL</label>
+        <div class="space-y-1">
+          <label class="flex items-center gap-2 bg-slate-900/60 border border-slate-800 hover:border-amber-500/30 rounded-lg px-2.5 py-1.5 cursor-pointer transition-all"><input type="radio" name="activity" value="1.2" onchange="updateAll()" class="accent-amber-400"><span class="text-[10px] font-mono text-slate-300 font-bold">SEDENTARY</span><span class="text-[9px] font-mono text-slate-600 ml-auto">desk, no exercise</span></label>
+          <label class="flex items-center gap-2 bg-slate-900/60 border border-amber-500/20 rounded-lg px-2.5 py-1.5 cursor-pointer transition-all"><input type="radio" name="activity" value="1.375" onchange="updateAll()" checked class="accent-amber-400"><span class="text-[10px] font-mono text-amber-300 font-bold">LIGHT</span><span class="text-[9px] font-mono text-slate-600 ml-auto">1-3×/week</span></label>
+          <label class="flex items-center gap-2 bg-slate-900/60 border border-slate-800 hover:border-amber-500/30 rounded-lg px-2.5 py-1.5 cursor-pointer transition-all"><input type="radio" name="activity" value="1.55" onchange="updateAll()" class="accent-amber-400"><span class="text-[10px] font-mono text-slate-300 font-bold">MODERATE</span><span class="text-[9px] font-mono text-slate-600 ml-auto">3-5×/week</span></label>
+          <label class="flex items-center gap-2 bg-slate-900/60 border border-slate-800 hover:border-amber-500/30 rounded-lg px-2.5 py-1.5 cursor-pointer transition-all"><input type="radio" name="activity" value="1.725" onchange="updateAll()" class="accent-amber-400"><span class="text-[10px] font-mono text-slate-300 font-bold">ACTIVE</span><span class="text-[9px] font-mono text-slate-600 ml-auto">6-7×/week</span></label>
+          <label class="flex items-center gap-2 bg-slate-900/60 border border-slate-800 hover:border-amber-500/30 rounded-lg px-2.5 py-1.5 cursor-pointer transition-all"><input type="radio" name="activity" value="1.9" onchange="updateAll()" class="accent-amber-400"><span class="text-[10px] font-mono text-slate-300 font-bold">ATHLETE</span><span class="text-[9px] font-mono text-slate-600 ml-auto">2×/day</span></label>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="block text-[10px] font-mono text-slate-300 mb-1.5">BODY GOAL</label>
+        <div class="grid grid-cols-3 gap-2">
+          <button id="btnGoalCut"      onclick="setGoal('cut')"      class="py-2 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono text-[10px] flex flex-col items-center gap-0.5 transition-all"><i class="fa-solid fa-arrow-trend-down"></i>CUT</button>
+          <button id="btnGoalMaintain" onclick="setGoal('maintain')" class="py-2 rounded-lg bg-slate-900 text-slate-400 border border-slate-700 font-mono text-[10px] flex flex-col items-center gap-0.5 transition-all"><i class="fa-solid fa-minus"></i>MAINTAIN</button>
+          <button id="btnGoalBulk"     onclick="setGoal('bulk')"     class="py-2 rounded-lg bg-slate-900 text-slate-400 border border-slate-700 font-mono text-[10px] flex flex-col items-center gap-0.5 transition-all"><i class="fa-solid fa-arrow-trend-up"></i>BULK</button>
+        </div>
+      </div>
+      <div class="bg-slate-900/60 border border-amber-500/10 rounded-xl p-3">
+        <p class="text-[8px] font-mono text-amber-400/70 mb-2 uppercase tracking-wider"><i class="fa-solid fa-calculator mr-1"></i>COMPUTED TARGETS</p>
+        <div class="grid grid-cols-2 gap-2 mb-2">
+          <div class="text-center"><p class="text-[8px] font-mono text-slate-500">BMR</p><p class="text-base font-orbitron font-black text-amber-400" id="calcBmrDisplay">—</p><p class="text-[8px] font-mono text-slate-600">kcal</p></div>
+          <div class="text-center"><p class="text-[8px] font-mono text-slate-500">TDEE</p><p class="text-base font-orbitron font-black text-orange-400" id="calcTdeeDisplay">—</p><p class="text-[8px] font-mono text-slate-600">kcal</p></div>
+        </div>
+        <div class="text-center mb-2 border-t border-slate-800 pt-2">
+          <p class="text-[8px] font-mono text-slate-500 mb-0.5">TARGET CALORIES / DAY</p>
+          <p class="text-2xl font-orbitron font-black text-cyan-400" id="calcTargetCalsDisplay">—</p>
+        </div>
+        <div class="grid grid-cols-3 gap-1.5">
+          <div class="bg-slate-950/40 rounded-lg p-1.5 text-center border border-blue-500/10"><p class="text-[7px] font-mono text-blue-400/70 uppercase">PROTEIN</p><p class="text-sm font-orbitron font-bold text-blue-400" id="calcProteinTarget">—</p><p class="text-[7px] font-mono text-slate-600">g/day</p></div>
+          <div class="bg-slate-950/40 rounded-lg p-1.5 text-center border border-amber-500/10"><p class="text-[7px] font-mono text-amber-400/70 uppercase">CARBS</p><p class="text-sm font-orbitron font-bold text-amber-400" id="calcCarbsTarget">—</p><p class="text-[7px] font-mono text-slate-600">g/day</p></div>
+          <div class="bg-slate-950/40 rounded-lg p-1.5 text-center border border-rose-500/10"><p class="text-[7px] font-mono text-rose-400/70 uppercase">FAT</p><p class="text-sm font-orbitron font-bold text-rose-400" id="calcFatTarget">—</p><p class="text-[7px] font-mono text-slate-600">g/day</p></div>
+        </div>
+      </div>
+    </div>
 
-                const data = JSON.parse(raw);
+    <!-- MEAL TRACKER -->
+    <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-xl relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-8 h-[1px] bg-emerald-500"></div><div class="absolute top-0 right-0 w-[1px] h-8 bg-emerald-500"></div>
+      <h3 class="text-xs font-mono text-emerald-400 tracking-widest uppercase mb-3 flex items-center justify-between"><span><i class="fa-solid fa-utensils mr-2"></i>MEAL TRACKER</span><span id="trackedMealsCount" class="text-[9px] px-2 py-0.5 rounded bg-emerald-950/50 border border-emerald-500/30 text-emerald-300">0 LOGS</span></h3>
+      <!-- Manual entry -->
+      <div class="space-y-2 mb-3">
+        <div class="grid grid-cols-12 gap-1.5">
+          <div class="col-span-4"><select id="newMealCategory" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 text-emerald-300 font-mono text-xs rounded-lg px-2 py-2 focus:outline-none"><option value="breakfast">🌅 BFAST</option><option value="lunch">☀️ LUNCH</option><option value="dinner">🌙 DINNER</option><option value="snacks">⚡ SNACKS</option></select></div>
+          <div class="col-span-8"><input type="text" id="newMealName" placeholder="Food / meal name" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 text-slate-100 font-mono text-xs rounded-lg px-3 py-2 focus:outline-none"></div>
+        </div>
+        <div class="grid grid-cols-12 gap-1.5">
+          <div class="col-span-3"><input type="number" id="newMealCals" placeholder="kcal" min="0" class="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 text-slate-100 font-mono text-xs rounded-lg px-2 py-2 focus:outline-none text-center"></div>
+          <div class="col-span-2"><input type="number" id="newMealProtein" placeholder="pro" min="0" class="w-full bg-slate-900 border border-slate-800 focus:border-blue-500 text-blue-300 font-mono text-xs rounded-lg px-2 py-2 focus:outline-none text-center"></div>
+          <div class="col-span-2"><input type="number" id="newMealCarbs" placeholder="carb" min="0" class="w-full bg-slate-900 border border-slate-800 focus:border-amber-500 text-amber-300 font-mono text-xs rounded-lg px-2 py-2 focus:outline-none text-center"></div>
+          <div class="col-span-2"><input type="number" id="newMealFat" placeholder="fat" min="0" class="w-full bg-slate-900 border border-slate-800 focus:border-rose-500 text-rose-300 font-mono text-xs rounded-lg px-2 py-2 focus:outline-none text-center"></div>
+          <div class="col-span-1"><button onclick="triggerMealPhotoUpload()" title="Attach photo" class="w-full h-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-cyan-300 rounded-lg text-xs transition-all flex items-center justify-center"><i class="fa-solid fa-camera"></i></button></div>
+          <div class="col-span-2"><button onclick="addMealItem()" class="w-full h-full bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/40 text-emerald-300 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1"><i class="fa-solid fa-plus"></i></button></div>
+        </div>
+        <div class="flex gap-1 text-[8px] font-mono text-slate-600 px-0.5">
+          <span class="w-1/4 text-center">kcal</span><span class="w-1/6 text-center text-blue-400/40">pro g</span><span class="w-1/6 text-center text-amber-400/40">carb g</span><span class="w-1/6 text-center text-rose-400/40">fat g</span><span class="w-1/6"></span><span class="w-1/6"></span>
+        </div>
+        <!-- Hidden file input for meal photo attach during manual add -->
+        <input type="file" id="mealPhotoAttachInput" accept="image/*" class="hidden" onchange="handleMealPhotoAttach(event)"/>
+        <div id="mealPhotoPreviewRow" class="hidden flex items-center gap-2 bg-slate-900/50 border border-slate-800 rounded-lg px-3 py-2">
+          <img id="mealPhotoThumb" src="" class="w-10 h-10 object-cover rounded-md"/>
+          <span class="text-[9px] font-mono text-slate-400 flex-1">PHOTO ATTACHED</span>
+          <button onclick="removeMealPhoto()" class="text-rose-500/60 hover:text-rose-400 text-xs"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+      <!-- AI scan button -->
+      <button onclick="openPhotoModalForNewMeal()" class="w-full mb-3 bg-slate-900/60 hover:bg-slate-800/80 border border-cyan-500/20 hover:border-cyan-400/60 rounded-xl py-2.5 px-4 flex items-center justify-center gap-3 transition-all">
+        <div class="relative"><i class="fa-solid fa-camera text-cyan-400 text-sm"></i><i class="fa-solid fa-bolt text-fuchsia-400 text-[8px] absolute -top-1 -right-1.5"></i></div>
+        <span class="text-xs font-orbitron font-bold text-cyan-300 tracking-widest">SCAN FOOD WITH AI</span>
+        <span class="text-[9px] font-mono text-slate-500">PHOTO → MACROS</span>
+      </button>
+      <!-- Meal list -->
+      <div id="mealListContainer" class="max-h-[340px] overflow-y-auto space-y-2 mb-4 pr-0.5"></div>
+      <!-- Totals -->
+      <div class="border-t border-slate-900 pt-3 space-y-2">
+        <div class="flex items-center justify-between text-xs font-mono text-slate-400"><span>CALORIES LOGGED:</span><span id="sumTotalCals" class="text-emerald-400 font-bold">0 kcal</span></div>
+        <div class="space-y-1.5">
+          <div><div class="flex justify-between text-[9px] font-mono mb-0.5"><span class="text-blue-400">PROTEIN</span><span id="proteinProgress" class="text-slate-500">0 / — g</span></div><div class="h-1.5 bg-slate-800 rounded-full overflow-hidden"><div id="proteinBar" class="bar-fill h-full bg-blue-500 rounded-full" style="width:0%"></div></div></div>
+          <div><div class="flex justify-between text-[9px] font-mono mb-0.5"><span class="text-amber-400">CARBS</span><span id="carbsProgress" class="text-slate-500">0 / — g</span></div><div class="h-1.5 bg-slate-800 rounded-full overflow-hidden"><div id="carbsBar" class="bar-fill h-full bg-amber-500 rounded-full" style="width:0%"></div></div></div>
+          <div><div class="flex justify-between text-[9px] font-mono mb-0.5"><span class="text-rose-400">FAT</span><span id="fatProgress" class="text-slate-500">0 / — g</span></div><div class="h-1.5 bg-slate-800 rounded-full overflow-hidden"><div id="fatBar" class="bar-fill h-full bg-rose-500 rounded-full" style="width:0%"></div></div></div>
+        </div>
+        <div class="flex items-center justify-between text-xs font-mono text-slate-400 pt-1"><span>REMAINING:</span><span id="netRemainingCals" class="text-teal-400 font-bold">— kcal</span></div>
+      </div>
+    </div>
 
-                // Restore fields
-                const f = data.fields || {};
-                if (f.weight)       weightInput.value       = f.weight;
-                if (f.fat)          fatInput.value          = f.fat;
-                if (f.muscle)       muscleInput.value       = f.muscle;
-                if (f.bmr)          bmrInput.value          = f.bmr;
-                if (f.targetBudget) targetBudgetInput.value = f.targetBudget;
-                if (f.visceral)     visceralInput.value     = f.visceral;
-                if (f.bodyAge)      bodyAgeInput.value      = f.bodyAge;
-                if (f.subjectName)  subjectNameInput.value  = f.subjectName;
+    <!-- AESTHETICS & ACTIONS -->
+    <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-xl">
+      <h3 class="text-xs font-mono text-slate-400 tracking-widest uppercase mb-3">Card Aesthetics</h3>
+      <div class="space-y-3">
+        <div><label class="block text-[10px] font-mono text-slate-300 mb-1">LAYOUT</label><div class="grid grid-cols-2 gap-2"><button id="btnRatio11" onclick="changeAspect('1:1')" class="py-2 px-3 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono text-xs flex items-center justify-center gap-2"><i class="fa-regular fa-square"></i> SQ (1:1)</button><button id="btnRatio916" onclick="changeAspect('9:16')" class="py-2 px-3 rounded bg-slate-900 text-slate-500 border border-slate-800 hover:text-slate-300 font-mono text-xs flex items-center justify-center gap-2"><i class="fa-solid fa-mobile-screen"></i> STORY (9:16)</button></div></div>
+        <div><label class="block text-[10px] font-mono text-slate-300 mb-1">THEME</label><div class="grid grid-cols-3 gap-2"><button onclick="setTheme('cyberpunk')" class="p-2 rounded bg-slate-900 border border-pink-500/20 text-pink-400 text-xs font-mono flex flex-col items-center gap-1"><span class="w-3 h-3 rounded-full bg-gradient-to-r from-pink-500 to-cyan-400"></span>CYBERPUNK</button><button onclick="setTheme('quantum')" class="p-2 rounded bg-slate-900 border border-emerald-500/20 text-emerald-400 text-xs font-mono flex flex-col items-center gap-1"><span class="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400"></span>QUANTUM</button><button onclick="setTheme('solar')" class="p-2 rounded bg-slate-900 border border-amber-500/20 text-amber-400 text-xs font-mono flex flex-col items-center gap-1"><span class="w-3 h-3 rounded-full bg-gradient-to-r from-amber-500 to-rose-500"></span>SOLAR</button></div></div>
+      </div>
+      <div class="mt-4 space-y-2">
+        <button onclick="exportCurrentPage()" class="w-full bg-gradient-to-r from-cyan-500 via-blue-600 to-fuchsia-600 hover:from-cyan-400 hover:via-blue-500 hover:to-fuchsia-500 text-white font-orbitron font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 tracking-widest text-xs"><i class="fa-solid fa-download"></i> EXPORT CURRENT PAGE (PNG)</button>
+        <button onclick="exportAllPages()" class="w-full bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-mono py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 text-xs"><i class="fa-solid fa-images"></i> EXPORT ALL PAGES</button>
+        <button onclick="clearToday()" class="w-full bg-slate-900 hover:bg-rose-950/40 border border-rose-900/40 hover:border-rose-500/50 text-rose-500/60 hover:text-rose-400 font-mono py-2 rounded-xl transition-all flex items-center justify-center gap-2 text-xs"><i class="fa-solid fa-trash-can"></i> CLEAR TODAY</button>
+        <p class="text-center text-[9px] font-mono text-slate-600" id="lastSavedText">LAST SAVE: —</p>
+      </div>
+    </div>
+  </section>
 
-                // Restore meals
-                if (Array.isArray(data.loggedMeals)) {
-                    loggedMeals = data.loggedMeals;
-                }
+  <!-- ══ RIGHT: PAGINATED CARD PREVIEW (7 cols) ══ -->
+  <section class="lg:col-span-7 flex flex-col items-center gap-4">
+    <div class="flex items-center justify-between w-full max-w-[520px]">
+      <h3 class="text-xs font-mono text-cyan-400 tracking-widest uppercase"><i class="fa-solid fa-display mr-1"></i> HOLO-PREVIEW</h3>
+      <div class="flex items-center gap-2">
+        <button onclick="prevPage()" id="btnPrevPage" class="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 hover:border-cyan-500/50 text-slate-400 hover:text-cyan-300 text-xs transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"><i class="fa-solid fa-chevron-left"></i></button>
+        <span class="text-[10px] font-mono text-slate-400" id="pageIndicator">PAGE 1 / 1</span>
+        <button onclick="nextPage()" id="btnNextPage" class="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 hover:border-cyan-500/50 text-slate-400 hover:text-cyan-300 text-xs transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
 
-                // Restore settings
-                if (data.unitSystem)    unitSystem    = data.unitSystem;
-                if (data.currentAspect) currentAspect = data.currentAspect;
+    <!-- Card container -->
+    <div id="exportContainer" class="p-3 bg-[#05080e] rounded-3xl border border-slate-950 shadow-2xl w-full max-w-[520px]">
+      <div id="cardViewport" class="relative">
+        <!-- Pages injected by JS -->
+      </div>
+    </div>
 
-                // Apply unit labels
-                applyUnitLabels();
+    <!-- Dot nav -->
+    <div id="pageDots" class="flex items-center gap-1.5"></div>
 
-                // Restore theme & aspect
-                if (data.currentTheme) setTheme(data.currentTheme);
-                if (data.currentAspect) changeAspect(data.currentAspect);
+    <!-- Toast -->
+    <div id="toastNotification" class="w-full max-w-[500px] bg-slate-950 border border-cyan-500/30 text-cyan-300 font-mono text-xs px-4 py-3 rounded-xl flex items-center justify-between shadow-2xl opacity-0 transition-opacity duration-300 pointer-events-none">
+      <span id="toastMsg"></span>
+      <i class="fa-solid fa-xmark cursor-pointer hover:text-white ml-3 shrink-0" onclick="hideToast()"></i>
+    </div>
+  </section>
+</main>
 
-                updateStorageStatus(true, data.savedAt);
-                return true;
-            } catch (e) {
-                updateStorageStatus(false);
-                return false;
-            }
-        }
+<footer class="bg-slate-950/90 border-t border-slate-900 py-6 relative z-10 mt-8">
+  <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-mono text-slate-500">
+    <p>© 2026 AURA SYNC SYSTEMS INC. v4</p>
+    <p>DAILY JOURNAL · STREAK ENGINE · AI MACRO SCANNER · LOCAL ONLY</p>
+  </div>
+</footer>
 
-        /** Prompt confirmation before wiping all saved data. */
-        function clearLocalStorage() {
-            if (!confirm('CLEAR ALL SAVED DATA?\n\nThis will remove all biometrics and meal logs from local storage. This cannot be undone.')) return;
-            try {
-                localStorage.removeItem(STORAGE_KEY);
-                loggedMeals = [];
-                updateStats();
-                updateStorageStatus(false);
-                document.getElementById('lastSavedText').textContent = 'LAST SAVE: —';
-                showToast("<i class='fa-solid fa-trash text-amber-400 mr-2'></i> LOCAL STORAGE CLEARED. DATA RESET.");
-            } catch (e) {
-                showToast("<i class='fa-solid fa-triangle-exclamation text-rose-500 mr-2'></i> CLEAR FAILED — STORAGE ERROR.");
-            }
-        }
+<!-- ════════════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════════════ -->
+<script>
+// ═══════════════ CONSTANTS ═══════════════
+const GLOBAL_KEY = 'aura_v4_global';  // settings, streak
+const DAY_PREFIX  = 'aura_v4_day_';   // + YYYY-MM-DD
 
-        /** Update the header storage status indicator. */
-        function updateStorageStatus(ok, isoTimestamp) {
-            const dot  = document.getElementById('storageIndicatorDot');
-            const text = document.getElementById('storageIndicatorText');
-            const last = document.getElementById('lastSavedText');
+// ═══════════════ STATE ═══════════════
+let unitSystem    = 'metric';
+let currentTheme  = 'cyberpunk';
+let currentAspect = '1:1';
+let bodyGoal      = 'cut';
+let targets       = { cals:0, protein:0, carbs:0, fat:0 };
 
-            if (ok) {
-                dot.className  = 'w-2 h-2 rounded-full bg-emerald-500';
-                text.textContent = 'LOCAL_STORAGE: SYNCED';
-                if (isoTimestamp) {
-                    const d = new Date(isoTimestamp);
-                    const pad = n => String(n).padStart(2, '0');
-                    last.textContent = `LAST SAVE: ${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-                }
-            } else {
-                dot.className  = 'w-2 h-2 rounded-full bg-slate-600';
-                text.textContent = 'LOCAL_STORAGE: EMPTY';
-            }
-        }
+// Daily data (for the currently viewed date)
+let viewingDate   = todayStr();  // YYYY-MM-DD
+let isViewingToday = true;
+let loggedMeals   = [];  // {id, category, name, cals, protein, carbs, fat, fiber, aiScanned, photoDataUrl}
 
-        // ─── UNIT SYSTEM ──────────────────────────────────────────────────────────
+// Photo modal state
+let photoBase64    = null;
+let photoMimeType  = 'image/jpeg';
+let aiResult       = {};
+let photoModalMode = 'new';   // 'new' | 'attach'
+let photoModalMealId = null;  // when mode=attach
+let photoCategory  = 'breakfast';
 
-        /** Apply correct unit label text without resetting field values. */
-        function applyUnitLabels() {
-            const weightUnitText = document.getElementById('weightUnitText');
-            const muscleUnitText = document.getElementById('muscleUnitText');
-            const btnMetric      = document.getElementById('btnMetric');
-            const btnImperial    = document.getElementById('btnImperial');
+// Pending new meal photo (manual add)
+let pendingMealPhotoDataUrl = null;
 
-            if (unitSystem === 'metric') {
-                btnMetric.className   = 'py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all duration-300 bg-cyan-500/20 text-cyan-300 border border-cyan-500/30';
-                btnImperial.className = 'py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all duration-300 text-slate-500 hover:text-slate-300';
-                weightUnitText.innerText = 'kg';
-                muscleUnitText.innerText = 'kg';
-                cardWeightUnit.innerText = 'KG';
-                cardMuscleUnit.innerText = 'KG';
-            } else {
-                btnImperial.className = 'py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all duration-300 bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30';
-                btnMetric.className   = 'py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all duration-300 text-slate-500 hover:text-slate-300';
-                weightUnitText.innerText = 'lbs';
-                muscleUnitText.innerText = 'lbs';
-                cardWeightUnit.innerText = 'LBS';
-                cardMuscleUnit.innerText = 'LBS';
-            }
-        }
+// Card pagination
+let currentPage = 0;
 
-        function setUnitSystem(system) {
-            unitSystem = system;
+// ═══════════════ DATE HELPERS ═══════════════
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function formatDateLabel(str) {
+  const [y,m,d] = str.split('-');
+  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  return `${d} ${months[parseInt(m)-1]} ${y}`;
+}
+function addDays(str, n) {
+  const d = new Date(str + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function daysBetween(a, b) {
+  return Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00')) / 86400000);
+}
 
-            if (system === 'metric') {
-                weightInput.value = '72.5';
-                muscleInput.value = '58.2';
-            } else {
-                weightInput.value = '160.0';
-                muscleInput.value = '128.5';
-            }
+// ═══════════════ DAY NAVIGATION ═══════════════
+function navigateDay(delta) {
+  saveCurrentDay();
+  const newDate = addDays(viewingDate, delta);
+  if (newDate > todayStr()) return; // can't go to future
+  viewingDate = newDate;
+  isViewingToday = (viewingDate === todayStr());
+  loadDay(viewingDate);
+}
 
-            applyUnitLabels();
-            updateStats();
-            saveToLocalStorage();
-        }
+function updateDateDisplay() {
+  const label = isViewingToday ? `TODAY · ${formatDateLabel(viewingDate)}` : formatDateLabel(viewingDate);
+  document.getElementById('currentDateDisplay').textContent = label;
+  document.getElementById('btnNextDay').disabled = isViewingToday;
+  const badge = document.getElementById('viewingBadge');
+  if (isViewingToday) badge.classList.add('hidden'); else badge.classList.remove('hidden');
+}
 
-        // ─── MEAL TRACKER ─────────────────────────────────────────────────────────
+// ═══════════════ STREAK ═══════════════
+function calcStreak() {
+  let streak = 0;
+  let check = todayStr();
+  // check if today has data (even just biometrics saved)
+  while (true) {
+    const raw = localStorage.getItem(DAY_PREFIX + check);
+    if (!raw) break;
+    streak++;
+    check = addDays(check, -1);
+  }
+  return streak;
+}
+function updateStreakDisplay() {
+  document.getElementById('streakCount').textContent = calcStreak();
+}
 
-        function addMealItem() {
-            const nameInput = document.getElementById('newMealName');
-            const calsInput = document.getElementById('newMealCals');
-            const name = nameInput.value.trim().toUpperCase() || `MEAL_${loggedMeals.length + 1}`;
-            const cals = parseInt(calsInput.value) || 0;
+// ═══════════════ SAVE / LOAD DAY ═══════════════
+function getDayData() {
+  return {
+    date: viewingDate,
+    savedAt: new Date().toISOString(),
+    unitSystem, bodyGoal,
+    activity: document.querySelector('input[name="activity"]:checked')?.value || '1.375',
+    fields: {
+      weight: document.getElementById('weight').value,
+      height: document.getElementById('height').value,
+      age:    document.getElementById('age').value,
+      sex:    document.getElementById('sex').value,
+      fat:    document.getElementById('fat').value,
+      muscle: document.getElementById('muscle').value,
+      visceral: document.getElementById('visceral').value,
+      bodyAge:  document.getElementById('bodyAge').value,
+      subjectName: document.getElementById('subjectName').value,
+    },
+    loggedMeals
+  };
+}
 
-            if (cals < 0) {
-                showToast("<i class='fa-solid fa-circle-exclamation text-rose-500 mr-2'></i> CALORIES CANNOT BE NEGATIVE.");
-                return;
-            }
+function saveCurrentDay(explicit = false) {
+  try {
+    const data = getDayData();
+    localStorage.setItem(DAY_PREFIX + viewingDate, JSON.stringify(data));
+    // Also save global prefs
+    saveGlobal();
+    updateStorageStatus(true, data.savedAt);
+    updateStreakDisplay();
+    if (explicit) showToast(`<i class='fa-solid fa-floppy-disk text-emerald-400 mr-2'></i> SAVED: ${formatDateLabel(viewingDate)}`);
+  } catch(e) {
+    if (explicit) showToast(`<i class='fa-solid fa-triangle-exclamation text-rose-500 mr-2'></i> SAVE FAILED: ${e.message.slice(0,40)}`);
+  }
+}
 
-            loggedMeals.push({ name, cals });
-            nameInput.value = '';
-            calsInput.value = '';
-            showToast(`<i class='fa-solid fa-check text-emerald-400 mr-2'></i> LOGGED ${name} (${cals} KCAL)`);
-            updateStats();
-            saveToLocalStorage();
-        }
+function loadDay(dateStr) {
+  const raw = localStorage.getItem(DAY_PREFIX + dateStr);
+  if (raw) {
+    try {
+      const data = JSON.parse(raw);
+      const f = data.fields || {};
+      const sv = (id, v) => { if (v !== undefined && document.getElementById(id)) document.getElementById(id).value = v; };
+      sv('weight', f.weight); sv('height', f.height); sv('age', f.age);
+      sv('fat', f.fat); sv('muscle', f.muscle); sv('visceral', f.visceral);
+      sv('bodyAge', f.bodyAge); sv('subjectName', f.subjectName);
+      if (f.sex) document.getElementById('sex').value = f.sex;
+      if (data.activity) {
+        const r = document.querySelector(`input[name="activity"][value="${data.activity}"]`);
+        if (r) r.checked = true;
+      }
+      if (data.unitSystem) unitSystem = data.unitSystem;
+      if (data.bodyGoal)   setGoal(data.bodyGoal);
+      loggedMeals = Array.isArray(data.loggedMeals) ? data.loggedMeals : [];
+      applyUnitLabels();
+    } catch(e) { loggedMeals = []; }
+  } else {
+    // New day — carry over biometrics from most recent day
+    const prev = localStorage.getItem(DAY_PREFIX + addDays(dateStr, -1));
+    if (prev) {
+      try {
+        const pd = JSON.parse(prev);
+        const f = pd.fields || {};
+        const sv = (id, v) => { if (v !== undefined && document.getElementById(id)) document.getElementById(id).value = v; };
+        sv('weight', f.weight); sv('height', f.height); sv('age', f.age);
+        sv('fat', f.fat); sv('muscle', f.muscle); sv('visceral', f.visceral);
+        sv('bodyAge', f.bodyAge); sv('subjectName', f.subjectName);
+        if (f.sex) document.getElementById('sex').value = f.sex;
+        if (pd.activity) { const r = document.querySelector(`input[name="activity"][value="${pd.activity}"]`); if (r) r.checked = true; }
+        if (pd.unitSystem) unitSystem = pd.unitSystem;
+        if (pd.bodyGoal)   setGoal(pd.bodyGoal);
+      } catch(e) {}
+    }
+    loggedMeals = [];
+  }
+  pendingMealPhotoDataUrl = null;
+  updateDateDisplay();
+  updateAll();
+}
 
-        function deleteMealItem(index) {
-            const removed = loggedMeals[index];
-            loggedMeals.splice(index, 1);
-            showToast(`<i class='fa-solid fa-trash text-amber-400 mr-2'></i> REMOVED ${removed.name}`);
-            updateStats();
-            saveToLocalStorage();
-        }
+function saveGlobal() {
+  localStorage.setItem(GLOBAL_KEY, JSON.stringify({ unitSystem, currentTheme, currentAspect, bodyGoal }));
+}
 
-        // ─── LIVE STATS UPDATE ────────────────────────────────────────────────────
+function loadGlobal() {
+  try {
+    const raw = localStorage.getItem(GLOBAL_KEY);
+    if (!raw) return;
+    const g = JSON.parse(raw);
+    if (g.unitSystem)    unitSystem    = g.unitSystem;
+    if (g.currentTheme)  currentTheme  = g.currentTheme;
+    if (g.currentAspect) currentAspect = g.currentAspect;
+    if (g.bodyGoal)      bodyGoal      = g.bodyGoal;
+  } catch(e) {}
+}
 
-        function updateStats() {
-            const weight      = parseFloat(weightInput.value)       || 0;
-            const fat         = parseFloat(fatInput.value)          || 0;
-            const muscle      = parseFloat(muscleInput.value)       || 0;
-            const bmr         = parseInt(bmrInput.value)            || 0;
-            const targetBudget= parseInt(targetBudgetInput.value)   || 0;
-            const visceral    = parseInt(visceralInput.value)       || 0;
-            const bodyAge     = parseInt(bodyAgeInput.value)        || 0;
-            const subjectName = subjectNameInput.value.toUpperCase().replace(/\s+/g, '_');
+// ═══════════════ HISTORY MODAL ═══════════════
+function openHistoryModal() {
+  renderHistoryList();
+  document.getElementById('historyModal').classList.add('open');
+}
+function closeHistoryModal() {
+  document.getElementById('historyModal').classList.remove('open');
+}
+function renderHistoryList() {
+  const container = document.getElementById('historyList');
+  const empty     = document.getElementById('historyEmpty');
+  // Collect all day keys
+  const days = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith(DAY_PREFIX)) days.push(k.replace(DAY_PREFIX, ''));
+  }
+  days.sort((a,b) => b.localeCompare(a)); // newest first
+  if (days.length === 0) {
+    container.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  container.innerHTML = days.map(d => {
+    let data = {};
+    try { data = JSON.parse(localStorage.getItem(DAY_PREFIX + d)); } catch(e) {}
+    const meals = Array.isArray(data.loggedMeals) ? data.loggedMeals : [];
+    const totalCals = meals.reduce((s,m)=>s+(m.cals||0),0);
+    const isToday = d === todayStr();
+    const isViewing = d === viewingDate;
+    return `<div class="day-row flex items-center justify-between rounded-xl border ${isViewing ? 'border-cyan-500/40 bg-cyan-950/10' : 'border-slate-800 bg-slate-900/40'} px-4 py-3 cursor-pointer transition-all" onclick="jumpToDay('${d}')">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-orbitron font-bold ${isToday ? 'text-cyan-400' : 'text-slate-200'}">${isToday ? '⚡ TODAY' : ''} ${formatDateLabel(d)}</span>
+          ${isViewing ? '<span class="text-[9px] font-mono text-cyan-400 bg-cyan-950/40 border border-cyan-500/30 px-1.5 rounded">CURRENT</span>' : ''}
+        </div>
+        <div class="flex items-center gap-3 mt-1 text-[9px] font-mono text-slate-500">
+          <span>${meals.length} meals</span>
+          <span class="text-emerald-400">${totalCals.toLocaleString()} kcal</span>
+          ${data.fields?.weight ? `<span class="text-cyan-400/60">${data.fields.weight}${unitSystem==='metric'?'kg':'lbs'}</span>` : ''}
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="event.stopPropagation(); deleteDay('${d}')" class="text-rose-500/40 hover:text-rose-400 text-xs transition-all"><i class="fa-solid fa-trash-can"></i></button>
+        <i class="fa-solid fa-chevron-right text-slate-600 text-xs"></i>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-            // Meal totals
-            const totalMealCals   = loggedMeals.reduce((s, m) => s + m.cals, 0);
-            const remainingBudget = targetBudget - totalMealCals;
+function jumpToDay(dateStr) {
+  saveCurrentDay();
+  viewingDate = dateStr;
+  isViewingToday = (viewingDate === todayStr());
+  loadDay(viewingDate);
+  closeHistoryModal();
+}
 
-            // Meal list sidebar
-            const mealListContainer = document.getElementById('mealListContainer');
-            const trackedMealsCount = document.getElementById('trackedMealsCount');
-            const sumTotalCals      = document.getElementById('sumTotalCals');
-            const netRemainingCals  = document.getElementById('netRemainingCals');
+function deleteDay(dateStr) {
+  if (!confirm(`DELETE data for ${formatDateLabel(dateStr)}?`)) return;
+  localStorage.removeItem(DAY_PREFIX + dateStr);
+  updateStreakDisplay();
+  renderHistoryList();
+  showToast(`<i class='fa-solid fa-trash text-amber-400 mr-2'></i> DELETED: ${formatDateLabel(dateStr)}`);
+}
 
-            if (loggedMeals.length === 0) {
-                mealListContainer.innerHTML = `
-                    <div class="text-center py-4 text-[10px] font-mono text-slate-600 border border-dashed border-slate-900 rounded-lg">
-                        NO MEALS RECORDED. SYNC ACTIVE BUDGET.
-                    </div>`;
-                trackedMealsCount.innerText = '0 LOGS';
-            } else {
-                trackedMealsCount.innerText = `${loggedMeals.length} LOGS`;
-                mealListContainer.innerHTML = loggedMeals.map((meal, idx) => `
-                    <div class="flex items-center justify-between bg-slate-900/60 border border-slate-800 rounded-lg px-3 py-1.5 text-xs font-mono">
-                        <span class="text-slate-300 font-bold tracking-wider">${meal.name}</span>
-                        <div class="flex items-center gap-3">
-                            <span class="text-emerald-400 font-bold">${meal.cals} kcal</span>
-                            <button onclick="deleteMealItem(${idx})" class="text-rose-500/60 hover:text-rose-400 transition-colors">
-                                <i class="fa-solid fa-trash-can text-[11px]"></i>
-                            </button>
-                        </div>
-                    </div>`).join('');
-            }
+// ═══════════════ TDEE / TARGETS ENGINE ═══════════════
+function calcTargets() {
+  const weight = parseFloat(document.getElementById('weight').value) || 70;
+  const height = parseFloat(document.getElementById('height').value) || 170;
+  const age    = parseInt(document.getElementById('age').value)      || 25;
+  const sex    = document.getElementById('sex').value;
+  const actR   = document.querySelector('input[name="activity"]:checked');
+  const act    = actR ? parseFloat(actR.value) : 1.375;
+  let wkg = weight, hcm = height;
+  if (unitSystem === 'imperial') { wkg = weight * 0.453592; hcm = height * 2.54; }
+  let bmr = sex === 'male' ? 10*wkg + 6.25*hcm - 5*age + 5 : 10*wkg + 6.25*hcm - 5*age - 161;
+  bmr = Math.round(bmr);
+  const tdee = Math.round(bmr * act);
+  let targetCals = bodyGoal === 'cut' ? Math.round(tdee*0.80) : bodyGoal === 'bulk' ? Math.round(tdee*1.10) : tdee;
+  let pPct = bodyGoal === 'cut' ? 0.40 : 0.30;
+  let cPct = bodyGoal === 'cut' ? 0.30 : bodyGoal === 'bulk' ? 0.50 : 0.45;
+  let fPct = bodyGoal === 'cut' ? 0.30 : bodyGoal === 'bulk' ? 0.20 : 0.25;
+  const proteinG = Math.round((targetCals * pPct) / 4);
+  const carbsG   = Math.round((targetCals * cPct) / 4);
+  const fatG     = Math.round((targetCals * fPct) / 9);
+  targets = { cals: targetCals, protein: proteinG, carbs: carbsG, fat: fatG };
+  document.getElementById('calcBmrDisplay').textContent        = bmr.toLocaleString();
+  document.getElementById('calcTdeeDisplay').textContent       = tdee.toLocaleString();
+  document.getElementById('calcTargetCalsDisplay').textContent = targetCals.toLocaleString();
+  document.getElementById('calcProteinTarget').textContent     = proteinG + 'g';
+  document.getElementById('calcCarbsTarget').textContent       = carbsG + 'g';
+  document.getElementById('calcFatTarget').textContent         = fatG + 'g';
+  return { bmr, tdee, targetCals, proteinG, carbsG, fatG };
+}
 
-            sumTotalCals.innerText = `${totalMealCals.toLocaleString()} kcal`;
+// ═══════════════ GOAL SELECTOR ═══════════════
+function setGoal(goal) {
+  bodyGoal = goal;
+  const styles = {
+    cut:      'py-2 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono text-[10px] flex flex-col items-center gap-0.5 transition-all',
+    maintain: 'py-2 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono text-[10px] flex flex-col items-center gap-0.5 transition-all',
+    bulk:     'py-2 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono text-[10px] flex flex-col items-center gap-0.5 transition-all',
+  };
+  const off = 'py-2 rounded-lg bg-slate-900 text-slate-400 border border-slate-700 font-mono text-[10px] flex flex-col items-center gap-0.5 transition-all';
+  ['cut','maintain','bulk'].forEach(g => {
+    document.getElementById('btn' + 'Goal' + g.charAt(0).toUpperCase() + g.slice(1)).className = g === goal ? styles[g] : off;
+  });
+  updateAll();
+}
 
-            if (remainingBudget >= 0) {
-                netRemainingCals.innerText   = `${remainingBudget.toLocaleString()} kcal`;
-                netRemainingCals.className   = 'text-emerald-400 font-bold ml-1';
-            } else {
-                netRemainingCals.innerText   = `OVER BY ${Math.abs(remainingBudget).toLocaleString()} kcal`;
-                netRemainingCals.className   = 'text-rose-400 font-bold ml-1 animate-pulse';
-            }
+// ═══════════════ MASTER UPDATE ═══════════════
+function updateAll() {
+  const t = calcTargets();
+  updateSidebar(t);
+  renderCardPages(t);
+  autoSave();
+}
 
-            // Card display
-            cardSubject.innerText  = subjectName || 'SUBJECT_01';
-            cardWeight.innerText   = weight.toFixed(1);
-            cardFat.innerText      = fat.toFixed(1);
-            cardMuscle.innerText   = muscle.toFixed(1);
-            cardBmr.innerText      = bmr;
-            cardVisceral.innerText = visceral;
-            cardBodyAge.innerText  = bodyAge;
-            cardDate.innerText     = formatSysDate();
-            cardTotalIntake.innerText = totalMealCals;
+function autoSave() {
+  // Debounced auto-save: only save after 1.5s of inactivity
+  clearTimeout(updateAll._saveTimer);
+  updateAll._saveTimer = setTimeout(() => saveCurrentDay(), 1500);
+}
 
-            if (remainingBudget >= 0) {
-                cardBudgetLeft.innerText   = remainingBudget;
-                cardBudgetLeft.className   = 'text-sm font-bold font-orbitron text-emerald-400 block';
-                deficitLabel.innerText     = 'DEFICIT REMAIN';
-                deficitLabel.className     = 'text-[8px] font-mono text-slate-400 block tracking-wider mb-1 uppercase';
-                deficitUnit.innerText      = 'KCAL LEFT';
-                deficitUnit.className      = 'text-[8px] font-mono text-slate-500 block uppercase';
-            } else {
-                cardBudgetLeft.innerText   = Math.abs(remainingBudget);
-                cardBudgetLeft.className   = 'text-sm font-bold font-orbitron text-rose-500 block';
-                deficitLabel.innerText     = 'SURPLUS OVER';
-                deficitLabel.className     = 'text-[8px] font-mono text-rose-400/80 block tracking-wider mb-1 uppercase';
-                deficitUnit.innerText      = 'KCAL OVER';
-                deficitUnit.className      = 'text-[8px] font-mono text-rose-500 block uppercase font-bold';
-            }
+// ═══════════════ SIDEBAR STATS ═══════════════
+function updateSidebar(t) {
+  const totalCals    = loggedMeals.reduce((s,m) => s+(m.cals||0), 0);
+  const totalProtein = loggedMeals.reduce((s,m) => s+(m.protein||0), 0);
+  const totalCarbs   = loggedMeals.reduce((s,m) => s+(m.carbs||0), 0);
+  const totalFat     = loggedMeals.reduce((s,m) => s+(m.fat||0), 0);
+  const remaining    = targets.cals - totalCals;
+  const pct          = (v, t) => t > 0 ? Math.min(100, Math.round((v/t)*100)) : 0;
 
-            // Card meal feed
-            const cardMealFeed  = document.getElementById('cardMealFeed');
-            const cardMealsCount= document.getElementById('cardMealsCount');
-            cardMealsCount.innerText = `${loggedMeals.length} ACTIVE LOGS`;
-            if (loggedMeals.length === 0) {
-                cardMealFeed.innerHTML = `<div class="text-slate-600 italic">> NO LOCAL MEALS SYNCHRONIZED...</div>`;
-            } else {
-                cardMealFeed.innerHTML = loggedMeals.map(meal => `
-                    <div class="flex justify-between border-b border-slate-900/40 pb-0.5">
-                        <span class="text-slate-400 font-mono tracking-wide truncate mr-2">> ${meal.name}</span>
-                        <span class="text-emerald-400/90 font-mono shrink-0">+${meal.cals} KCAL</span>
-                    </div>`).join('');
-            }
+  document.getElementById('trackedMealsCount').textContent = `${loggedMeals.length} LOGS`;
+  document.getElementById('sumTotalCals').textContent = `${totalCals.toLocaleString()} kcal`;
 
-            // Gauge rings
-            const weightMaxVal  = unitSystem === 'metric' ? 200 : 440;
-            const weightOffset  = 276 - (276 * Math.min(1, weight / weightMaxVal));
-            weightRing.style.strokeDashoffset = Math.max(0, Math.min(276, weightOffset));
+  document.getElementById('proteinProgress').textContent = `${Math.round(totalProtein)} / ${targets.protein||'—'}g`;
+  document.getElementById('proteinBar').style.width = pct(totalProtein, targets.protein) + '%';
+  document.getElementById('carbsProgress').textContent = `${Math.round(totalCarbs)} / ${targets.carbs||'—'}g`;
+  document.getElementById('carbsBar').style.width = pct(totalCarbs, targets.carbs) + '%';
+  document.getElementById('fatProgress').textContent = `${Math.round(totalFat)} / ${targets.fat||'—'}g`;
+  document.getElementById('fatBar').style.width = pct(totalFat, targets.fat) + '%';
 
-            const fatOffset = 276 - (276 * Math.min(1, fat / 50));
-            fatRing.style.strokeDashoffset = Math.max(0, Math.min(276, fatOffset));
-        }
+  const remEl = document.getElementById('netRemainingCals');
+  if (remaining >= 0) { remEl.textContent = `${remaining.toLocaleString()} kcal left`; remEl.className = 'text-teal-400 font-bold'; }
+  else                { remEl.textContent = `OVER +${Math.abs(remaining).toLocaleString()} kcal`; remEl.className = 'text-rose-400 font-bold animate-pulse'; }
 
-        // ─── ASPECT / THEME ───────────────────────────────────────────────────────
+  // Meal list grouped by category
+  const mealContainer = document.getElementById('mealListContainer');
+  const CATS = [
+    { key:'breakfast', label:'🌅 BREAKFAST', color:'text-amber-400',  border:'border-amber-500/20',  bg:'bg-amber-950/10' },
+    { key:'lunch',     label:'☀️ LUNCH',     color:'text-yellow-400', border:'border-yellow-500/20', bg:'bg-yellow-950/10' },
+    { key:'dinner',    label:'🌙 DINNER',    color:'text-blue-400',   border:'border-blue-500/20',   bg:'bg-blue-950/10' },
+    { key:'snacks',    label:'⚡ SNACKS',    color:'text-violet-400', border:'border-violet-500/20', bg:'bg-violet-950/10' },
+  ];
+  if (loggedMeals.length === 0) {
+    mealContainer.innerHTML = `<div class="text-center py-4 text-[10px] font-mono text-slate-600 border border-dashed border-slate-900 rounded-lg">NO MEALS RECORDED.</div>`;
+  } else {
+    let html = '';
+    CATS.forEach(cat => {
+      const items = loggedMeals.map((m,i)=>({...m,_idx:i})).filter(m=>(m.category||'breakfast')===cat.key);
+      if (!items.length) return;
+      const catCals = items.reduce((s,m)=>s+(m.cals||0),0);
+      html += `<div class="rounded-xl border ${cat.border} ${cat.bg} overflow-hidden">
+        <div class="flex items-center justify-between px-3 py-1.5 border-b ${cat.border}">
+          <span class="text-[9px] font-orbitron font-bold ${cat.color} tracking-wider">${cat.label}</span>
+          <span class="text-[9px] font-mono text-slate-500">${catCals} kcal</span>
+        </div>
+        <div class="space-y-1 p-1.5">`;
+      items.forEach(m => {
+        html += `<div class="bg-slate-900/70 rounded-lg px-2.5 py-1.5 text-xs font-mono">
+          <div class="flex items-center justify-between gap-1">
+            <span class="text-slate-200 font-bold flex items-center gap-1 truncate">
+              ${m.aiScanned ? '<i class="fa-solid fa-camera text-cyan-500/60 text-[9px] shrink-0"></i>' : ''}
+              <span class="truncate">${m.name}</span>
+            </span>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="text-emerald-400 font-bold">${m.cals}</span>
+              <button onclick="attachPhotoToMeal('${m.id}')" title="Add/view photo" class="text-slate-600 hover:text-cyan-400 transition-colors"><i class="fa-solid fa-image text-[10px]"></i></button>
+              <button onclick="deleteMealItem('${m.id}')" class="text-rose-500/40 hover:text-rose-400 transition-colors"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
+            </div>
+          </div>
+          ${(m.protein||m.carbs||m.fat) ? `<div class="flex gap-2 mt-0.5 text-[9px] opacity-70"><span class="text-blue-400">${m.protein||0}p</span><span class="text-amber-400">${m.carbs||0}c</span><span class="text-rose-400">${m.fat||0}f</span>${m.fiber?`<span class="text-emerald-400">${m.fiber}fi</span>`:''}</div>` : ''}
+          ${m.photoDataUrl ? `<img src="${m.photoDataUrl}" class="mt-1.5 w-full h-16 object-cover rounded-md opacity-80 hover:opacity-100 transition-opacity cursor-pointer" onclick="viewMealPhoto('${m.id}')"/>` : ''}
+        </div>`;
+      });
+      html += `</div></div>`;
+    });
+    mealContainer.innerHTML = html;
+  }
+}
 
-        function changeAspect(ratio) {
-            currentAspect = ratio;
-            const card      = document.getElementById('shareCard');
-            const btn11     = document.getElementById('btnRatio11');
-            const btn916    = document.getElementById('btnRatio916');
-            const activeClass  = 'py-2 px-3 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono text-xs text-center flex items-center justify-center gap-2';
-            const inactiveClass= 'py-2 px-3 rounded bg-slate-900 text-slate-500 border border-slate-800 hover:text-slate-300 font-mono text-xs text-center flex items-center justify-center gap-2';
+// ═══════════════ CARD PAGES ═══════════════
+const themes = {
+  cyberpunk: { border:'rgba(6,182,212,0.25)',   accent:'#22d3ee', accent2:'#ec4899', dot:'#22d3ee', txt:'CYBERPUNK',    scan:'via-cyan-400',   wc:'#22d3ee', fc:'#ec4899' },
+  quantum:   { border:'rgba(34,197,94,0.25)',   accent:'#4ade80', accent2:'#14b8a6', dot:'#10b981', txt:'QUANTUM_MINT', scan:'via-emerald-400', wc:'#4ade80', fc:'#14b8a6' },
+  solar:     { border:'rgba(245,158,11,0.25)',  accent:'#f59e0b', accent2:'#f43f5e', dot:'#f59e0b', txt:'SOLAR_FLARE',  scan:'via-amber-500',  wc:'#f59e0b', fc:'#f43f5e' },
+};
 
-            if (ratio === '1:1') {
-                card.style.width     = '480px';
-                card.style.minHeight = '480px';
-                card.style.height    = 'auto';
-                btn11.className   = activeClass;
-                btn916.className  = inactiveClass;
-            } else {
-                card.style.width     = '380px';
-                card.style.minHeight = '675px';
-                card.style.height    = 'auto';
-                btn916.className  = activeClass;
-                btn11.className   = inactiveClass;
-            }
-            saveToLocalStorage();
-        }
+function cardBase(pageIdx, totalPages, subject, dateStr, theme) {
+  const th = themes[theme] || themes.cyberpunk;
+  return `<div class="relative overflow-hidden flex flex-col font-sans grid-bg select-none"
+    style="background-color:#060a12;border:2px solid ${th.border};${currentAspect==='9:16'?'width:380px;min-height:675px':'width:480px;min-height:480px'}">
+    <div class="scanning-bar absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent ${th.scan} to-transparent z-20 pointer-events-none"></div>
+    <div class="absolute inset-0 scanline pointer-events-none opacity-[0.12] z-10"></div>
+    <!-- header -->
+    <div class="px-5 pt-4 pb-2 relative z-10 flex justify-between items-start">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <div class="w-2 h-2 rounded-full animate-pulse" style="background:${th.dot}"></div>
+          <span class="font-mono text-[10px] font-bold tracking-widest" style="color:${th.accent}">${subject}</span>
+          <span class="text-[8px] font-mono text-slate-500 px-1.5 py-0.5 bg-slate-900 border border-slate-800 rounded">AURA_V4</span>
+        </div>
+        <h2 class="text-base font-orbitron font-black text-white tracking-wider leading-none">BIOMETRICS SCAN</h2>
+        <p class="text-[9px] font-mono text-slate-400 mt-0.5">${formatDateLabel(dateStr)}</p>
+      </div>
+      <div class="text-right font-mono text-[8px] text-slate-500 leading-relaxed">
+        <div style="color:${th.accent}">${themes[theme]?.txt||'CYBERPUNK'}</div>
+        <div>${pageIdx+1} / ${totalPages}</div>
+      </div>
+    </div>`;
+}
 
-        const themes = {
-            cyberpunk: {
-                border: 'rgba(6, 182, 212, 0.25)',
-                weightRingColor: '#22d3ee',
-                fatRingColor: '#ec4899',
-                dotColor: '#22d3ee',
-                sysText: 'SPECTRUM: CYBERPUNK',
-                scanColor: 'from-transparent via-cyan-400 to-transparent'
-            },
-            quantum: {
-                border: 'rgba(34, 197, 94, 0.25)',
-                weightRingColor: '#4ade80',
-                fatRingColor: '#14b8a6',
-                dotColor: '#10b981',
-                sysText: 'SPECTRUM: QUANTUM_MINT',
-                scanColor: 'from-transparent via-emerald-400 to-transparent'
-            },
-            solar: {
-                border: 'rgba(245, 158, 11, 0.25)',
-                weightRingColor: '#f59e0b',
-                fatRingColor: '#f43f5e',
-                dotColor: '#f59e0b',
-                sysText: 'SPECTRUM: SOLAR_FLARE',
-                scanColor: 'from-transparent via-amber-500 to-transparent'
-            }
-        };
+function renderCardPages(t) {
+  if (!t) t = calcTargets();
+  const weight  = parseFloat(document.getElementById('weight').value) || 0;
+  const fat     = parseFloat(document.getElementById('fat').value)    || 0;
+  const muscle  = parseFloat(document.getElementById('muscle').value) || 0;
+  const vis     = parseInt(document.getElementById('visceral').value) || 0;
+  const bAge    = parseInt(document.getElementById('bodyAge').value)  || 0;
+  const subj    = (document.getElementById('subjectName').value || 'AGENT').toUpperCase().replace(/\s+/g,'_');
+  const totalCals    = loggedMeals.reduce((s,m)=>s+(m.cals||0),0);
+  const totalProtein = loggedMeals.reduce((s,m)=>s+(m.protein||0),0);
+  const totalCarbs   = loggedMeals.reduce((s,m)=>s+(m.carbs||0),0);
+  const totalFatLog  = loggedMeals.reduce((s,m)=>s+(m.fat||0),0);
+  const remaining    = targets.cals - totalCals;
+  const th = themes[currentTheme] || themes.cyberpunk;
 
-        function setTheme(key) {
-            currentTheme = key;
-            const theme       = themes[key];
-            const card        = document.getElementById('shareCard');
-            const themeDot    = document.getElementById('themeDot');
-            const sysThemeText= document.getElementById('sysThemeText');
-            const scanningBar = document.getElementById('scanningBar');
+  // Build page array
+  const pages = [];
 
-            card.style.borderColor   = theme.border;
-            themeDot.style.backgroundColor = theme.dotColor;
-            weightRing.style.color   = theme.weightRingColor;
-            fatRing.style.color      = theme.fatRingColor;
-            sysThemeText.innerText   = theme.sysText;
-            scanningBar.className    = `scanning-bar absolute left-0 right-0 h-[2px] bg-gradient-to-r ${theme.scanColor} z-20 pointer-events-none`;
+  // ── PAGE 1: BIOMETRICS OVERVIEW ──
+  const wMax = unitSystem === 'metric' ? 200 : 440;
+  const wOff = Math.max(0, 276 - (276 * Math.min(1, weight/wMax)));
+  const fOff = Math.max(0, 276 - (276 * Math.min(1, fat/50)));
+  const wu   = unitSystem === 'metric' ? 'KG' : 'LBS';
+  const goalLabel = { cut:'CUT (-20%)', maintain:'MAINTAIN', bulk:'BULK (+10%)' }[bodyGoal] || '';
+  const goalColor = { cut:'#f87171', maintain:'#fbbf24', bulk:'#4ade80' }[bodyGoal] || '#22d3ee';
 
-            saveToLocalStorage();
-        }
+  let p1 = cardBase(0, Math.max(1, pages.length + 1 + loggedMeals.length), subj, viewingDate, currentTheme);
+  p1 += `<div class="px-5 py-2 flex items-center justify-around gap-3 relative z-10">
+    <!-- Weight ring -->
+    <div class="relative w-28 h-28 flex items-center justify-center shrink-0">
+      <svg class="absolute inset-0 -rotate-90" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="44" stroke="#1e293b" stroke-width="2" fill="transparent"/>
+        <circle cx="50" cy="50" r="44" stroke="${th.wc}" stroke-width="4.5" fill="transparent" stroke-dasharray="276" stroke-dashoffset="${wOff}" style="filter:drop-shadow(0 0 4px ${th.wc}88)"/>
+      </svg>
+      <div class="text-center z-10"><p class="text-[7px] font-mono text-slate-400 uppercase">WEIGHT</p><p class="text-xl font-black font-orbitron text-white leading-none">${weight.toFixed(1)}</p><p class="text-[9px] font-mono font-bold" style="color:${th.wc}">${wu}</p></div>
+    </div>
+    <!-- Fat ring -->
+    <div class="relative w-28 h-28 flex items-center justify-center shrink-0">
+      <svg class="absolute inset-0 -rotate-90" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="44" stroke="#1e293b" stroke-width="2" fill="transparent"/>
+        <circle cx="50" cy="50" r="44" stroke="${th.fc}" stroke-width="4.5" fill="transparent" stroke-dasharray="276" stroke-dashoffset="${fOff}" style="filter:drop-shadow(0 0 4px ${th.fc}88)"/>
+      </svg>
+      <div class="text-center z-10"><p class="text-[7px] font-mono text-slate-400 uppercase">BODY FAT</p><p class="text-xl font-black font-orbitron text-white leading-none">${fat.toFixed(1)}</p><p class="text-[9px] font-mono font-bold" style="color:${th.fc}">%</p></div>
+    </div>
+    <!-- BMR/TDEE stack -->
+    <div class="flex flex-col gap-1.5">
+      <div class="bg-slate-900/50 border border-amber-500/15 rounded-lg p-2 text-center min-w-[64px]"><p class="text-[7px] font-mono text-slate-500">BMR</p><p class="text-sm font-orbitron font-bold text-amber-400">${t.bmr||'—'}</p><p class="text-[7px] font-mono text-slate-600">kcal</p></div>
+      <div class="bg-slate-900/50 border border-orange-500/15 rounded-lg p-2 text-center"><p class="text-[7px] font-mono text-slate-500">TDEE</p><p class="text-sm font-orbitron font-bold text-orange-400">${t.tdee||'—'}</p><p class="text-[7px] font-mono text-slate-600">kcal</p></div>
+    </div>
+  </div>
+  <!-- Target vs Intake -->
+  <div class="px-5 pb-2 relative z-10">
+    <div class="h-[1px] bg-slate-800 my-2 flex items-center justify-center"><span class="text-[7px] font-mono text-slate-500 bg-slate-950 px-2 uppercase">DAILY TARGET vs INTAKE</span></div>
+    <div class="grid grid-cols-2 gap-2 mb-2">
+      <div class="bg-slate-900/40 border border-slate-800 rounded-lg p-2 text-center">
+        <p class="text-[7px] font-mono text-slate-500 uppercase mb-0.5">TARGET</p>
+        <p class="text-lg font-orbitron font-black" style="color:${th.accent}">${targets.cals||'—'}</p>
+        <p class="text-[7px] font-mono" style="color:${goalColor}">${goalLabel}</p>
+      </div>
+      <div class="bg-slate-900/40 border border-slate-800 rounded-lg p-2 text-center">
+        <p class="text-[7px] font-mono text-slate-500 uppercase mb-0.5">LOGGED</p>
+        <p class="text-lg font-orbitron font-black text-emerald-400">${totalCals.toLocaleString()}</p>
+        <p class="text-[7px] font-mono ${remaining>=0?'text-teal-400':'text-rose-400'}">${remaining>=0?`${remaining} left`:`+${Math.abs(remaining)} over`}</p>
+      </div>
+    </div>
+    <!-- Macro targets vs logged -->
+    <div class="grid grid-cols-3 gap-1.5 mb-2">
+      <div class="bg-slate-900/40 border border-blue-500/10 rounded-lg p-1.5 text-center"><p class="text-[7px] font-mono text-blue-400/70 uppercase">PROTEIN</p><p class="text-xs font-orbitron font-bold text-blue-400">${Math.round(totalProtein)}</p><p class="text-[7px] font-mono text-slate-600">/ ${targets.protein||'—'}g</p></div>
+      <div class="bg-slate-900/40 border border-amber-500/10 rounded-lg p-1.5 text-center"><p class="text-[7px] font-mono text-amber-400/70 uppercase">CARBS</p><p class="text-xs font-orbitron font-bold text-amber-400">${Math.round(totalCarbs)}</p><p class="text-[7px] font-mono text-slate-600">/ ${targets.carbs||'—'}g</p></div>
+      <div class="bg-slate-900/40 border border-rose-500/10 rounded-lg p-1.5 text-center"><p class="text-[7px] font-mono text-rose-400/70 uppercase">FAT</p><p class="text-xs font-orbitron font-bold text-rose-400">${Math.round(totalFatLog)}</p><p class="text-[7px] font-mono text-slate-600">/ ${targets.fat||'—'}g</p></div>
+    </div>
+    <!-- Aux stats row -->
+    <div class="grid grid-cols-3 gap-1.5">
+      <div class="bg-slate-900/40 border border-slate-800 rounded-lg p-1.5 text-center"><p class="text-[7px] font-mono text-slate-500 uppercase">MUSCLE</p><p class="text-sm font-orbitron font-bold text-emerald-400">${muscle.toFixed(1)}</p><p class="text-[7px] font-mono text-slate-600">${wu}</p></div>
+      <div class="bg-slate-900/40 border border-slate-800 rounded-lg p-1.5 text-center"><p class="text-[7px] font-mono text-slate-500 uppercase">VISCERAL</p><p class="text-sm font-orbitron font-bold text-violet-400">${vis}</p><p class="text-[7px] font-mono text-slate-600">LEVEL</p></div>
+      <div class="bg-slate-900/40 border border-slate-800 rounded-lg p-1.5 text-center"><p class="text-[7px] font-mono text-slate-500 uppercase">BODY AGE</p><p class="text-sm font-orbitron font-bold text-rose-400">${bAge}</p><p class="text-[7px] font-mono text-slate-600">YRS</p></div>
+    </div>
+    <div class="mt-2 flex justify-between text-[8px] font-mono text-slate-600"><span>AURA_HEALTH_PROTOCOL_v4</span><span id="streakCardLabel">🔥 — DAY STREAK</span></div>
+  </div>
+</div>`;
+  pages.push(p1);
 
-        // ─── MISC ACTIONS ─────────────────────────────────────────────────────────
+  // ── MEAL PAGES: one page per logged meal ──
+  loggedMeals.forEach((meal, idx) => {
+    const catColors = { breakfast:'#fbbf24', lunch:'#facc15', dinner:'#60a5fa', snacks:'#a78bfa' };
+    const catLabels = { breakfast:'🌅 BREAKFAST', lunch:'☀️ LUNCH', dinner:'🌙 DINNER', snacks:'⚡ SNACKS' };
+    const cc = catColors[meal.category||'breakfast'] || '#22d3ee';
+    const cl = catLabels[meal.category||'breakfast'] || 'MEAL';
+    const totalMacroKcal = ((meal.protein||0)*4 + (meal.carbs||0)*4 + (meal.fat||0)*9);
 
-        function triggerHologramScan() {
-            showToast("<i class='fa-solid fa-sync animate-spin mr-2'></i> INITIATING HOLO-SCAN MATRIX SYNC...");
-            const card = document.getElementById('shareCard');
-            card.style.opacity = '0.5';
-            setTimeout(() => {
-                card.style.opacity = '1';
-                showToast("<i class='fa-solid fa-circle-check mr-2 text-emerald-400'></i> METRICS SUCCESSFULLY SYNCED TO HUD ENGINE");
-            }, 800);
-        }
+    let pg = cardBase(idx+1, pages.length + 1 + (loggedMeals.length - idx), subj, viewingDate, currentTheme);
+    pg += `<div class="px-5 pb-4 relative z-10 flex flex-col gap-3 flex-1">
+      <!-- Category chip -->
+      <div class="flex items-center gap-2">
+        <span class="text-[9px] font-orbitron font-bold px-2 py-0.5 rounded-full border" style="color:${cc};border-color:${cc}44;background:${cc}11">${cl}</span>
+        <span class="text-[9px] font-mono text-slate-500">MEAL ${idx+1} of ${loggedMeals.length}</span>
+      </div>
+      <!-- Food name + calorie hero -->
+      <div class="text-center py-2">
+        <p class="text-xl font-orbitron font-black text-white leading-tight mb-1">${meal.name}</p>
+        <p class="text-4xl font-orbitron font-black" style="color:${th.accent}">${meal.cals||0}</p>
+        <p class="text-[10px] font-mono text-slate-400">KCAL</p>
+      </div>
+      <!-- Macro breakdown -->
+      <div class="grid grid-cols-4 gap-2">
+        <div class="bg-slate-900/50 border border-blue-500/15 rounded-xl p-2 text-center"><p class="text-[7px] font-mono text-blue-400/80 uppercase">PROTEIN</p><p class="text-lg font-orbitron font-bold text-blue-400">${meal.protein||0}</p><p class="text-[7px] font-mono text-slate-600">g</p></div>
+        <div class="bg-slate-900/50 border border-amber-500/15 rounded-xl p-2 text-center"><p class="text-[7px] font-mono text-amber-400/80 uppercase">CARBS</p><p class="text-lg font-orbitron font-bold text-amber-400">${meal.carbs||0}</p><p class="text-[7px] font-mono text-slate-600">g</p></div>
+        <div class="bg-slate-900/50 border border-rose-500/15 rounded-xl p-2 text-center"><p class="text-[7px] font-mono text-rose-400/80 uppercase">FAT</p><p class="text-lg font-orbitron font-bold text-rose-400">${meal.fat||0}</p><p class="text-[7px] font-mono text-slate-600">g</p></div>
+        <div class="bg-slate-900/50 border border-emerald-500/15 rounded-xl p-2 text-center"><p class="text-[7px] font-mono text-emerald-400/80 uppercase">FIBER</p><p class="text-lg font-orbitron font-bold text-emerald-400">${meal.fiber||0}</p><p class="text-[7px] font-mono text-slate-600">g</p></div>
+      </div>
+      <!-- Macro kcal bar -->
+      ${totalMacroKcal > 0 ? (() => {
+        const pW = Math.round(((meal.protein||0)*4/totalMacroKcal)*100);
+        const cW = Math.round(((meal.carbs||0)*4/totalMacroKcal)*100);
+        const fW = 100-pW-cW;
+        return `<div>
+          <p class="text-[7px] font-mono text-slate-600 mb-1 uppercase">MACRO DISTRIBUTION</p>
+          <div class="flex h-3 rounded-full overflow-hidden gap-0.5">
+            <div class="bg-blue-500" style="width:${pW}%"></div>
+            <div class="bg-amber-500" style="width:${cW}%"></div>
+            <div class="bg-rose-500" style="width:${Math.max(0,fW)}%"></div>
+          </div>
+          <div class="flex justify-between text-[7px] font-mono text-slate-600 mt-0.5">
+            <span class="text-blue-400/60">${pW}% PRO</span><span class="text-amber-400/60">${cW}% CARB</span><span class="text-rose-400/60">${Math.max(0,fW)}% FAT</span>
+          </div>
+        </div>`;
+      })() : ''}
+      <!-- Food photo (if attached) -->
+      ${meal.photoDataUrl ? `<div class="rounded-xl overflow-hidden border border-slate-800" style="max-height:160px"><img src="${meal.photoDataUrl}" class="w-full object-cover" style="max-height:160px"/></div>` : `<div class="flex items-center justify-center rounded-xl border border-dashed border-slate-800 text-slate-700 font-mono text-[9px] py-4"><i class="fa-solid fa-image mr-2"></i>NO PHOTO ATTACHED</div>`}
+      ${meal.aiScanned ? `<div class="text-center text-[8px] font-mono text-cyan-500/50"><i class="fa-solid fa-microchip mr-1"></i>AI DETECTED</div>` : ''}
+    </div></div>`;
+    pages.push(pg);
+  });
 
-        function showToast(msg) {
-            const toast    = document.getElementById('toastNotification');
-            const toastMsg = document.getElementById('toastMsg');
-            toastMsg.innerHTML = msg;
-            toast.style.opacity = '1';
-            toast.style.pointerEvents = 'auto';
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.pointerEvents = 'none';
-            }, 4500);
-        }
+  // Inject into DOM
+  const vp = document.getElementById('cardViewport');
+  vp.innerHTML = pages.map((html, i) =>
+    `<div class="card-page${i === currentPage ? ' active' : ''}" data-page="${i}">${html}</div>`
+  ).join('');
 
-        function hideToast() {
-            const toast = document.getElementById('toastNotification');
-            toast.style.opacity = '0';
-            toast.style.pointerEvents = 'none';
-        }
+  // Set viewport height to match current page
+  const activePage = vp.querySelector('.card-page.active');
+  if (activePage) vp.style.minHeight = activePage.offsetHeight + 'px';
 
-        function formatSysDate() {
-            const d   = new Date();
-            const pad = n => String(n).padStart(2, '0');
-            return `SYNC: ${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())}_${pad(d.getHours())}:${pad(d.getMinutes())}`;
-        }
+  // Update pagination controls
+  updatePagination(pages.length);
 
-        function exportCard() {
-            showToast("<i class='fa-solid fa-spinner animate-spin mr-2'></i> INTERPOLATING HI-RES MATRIX ASSETS...");
-            const card = document.getElementById('shareCard');
-            html2canvas(card, {
-                backgroundColor: '#05080e',
-                scale: 2.5,
-                logging: false,
-                useCORS: true,
-                allowTaint: true
-            }).then(canvas => {
-                const image = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
-                const link  = document.createElement('a');
-                const date  = new Date().toISOString().slice(0,10);
-                link.download = `AURA_SYNC_${subjectNameInput.value.toUpperCase() || 'AGENT'}_${date}.png`;
-                link.href = image;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                showToast("<i class='fa-solid fa-check text-emerald-400 mr-2'></i> IMAGE DOWNLOAD COMPLETE. SYSTEM READY.");
-            }).catch(err => {
-                console.error(err);
-                showToast("<i class='fa-solid fa-triangle-exclamation text-rose-500 mr-2'></i> SYSTEM ERROR: INTERPOLATION FAILED.");
-            });
-        }
+  // Update streak label on card
+  const streakEl = document.getElementById('streakCardLabel');
+  if (streakEl) streakEl.textContent = `🔥 ${calcStreak()} DAY STREAK`;
+}
 
-        // ─── BOOT ─────────────────────────────────────────────────────────────────
+function updatePagination(total) {
+  const prevBtn = document.getElementById('btnPrevPage');
+  const nextBtn = document.getElementById('btnNextPage');
+  const ind     = document.getElementById('pageIndicator');
+  prevBtn.disabled = currentPage <= 0;
+  nextBtn.disabled = currentPage >= total - 1;
+  ind.textContent  = `PAGE ${currentPage+1} / ${total}`;
+  // Dots
+  const dots = document.getElementById('pageDots');
+  dots.innerHTML = Array.from({length: total}, (_, i) =>
+    `<button onclick="goToPage(${i})" class="w-2 h-2 rounded-full transition-all ${i===currentPage ? 'bg-cyan-400 w-4' : 'bg-slate-700 hover:bg-slate-500'}"></button>`
+  ).join('');
+}
 
-        window.onload = function () {
-            const restored = loadFromLocalStorage();
-            updateStats();
+function goToPage(n) {
+  const vp    = document.getElementById('cardViewport');
+  const pages = vp.querySelectorAll('.card-page');
+  if (n < 0 || n >= pages.length) return;
+  pages.forEach((p,i) => { p.classList.toggle('active', i === n); });
+  currentPage = n;
+  updatePagination(pages.length);
+  // Sync height
+  const active = vp.querySelector('.card-page.active');
+  if (active) vp.style.minHeight = active.scrollHeight + 'px';
+}
+function prevPage() { goToPage(currentPage - 1); }
+function nextPage() { goToPage(currentPage + 1); }
 
-            // Apply theme if not loaded from storage
-            if (!restored) {
-                setTheme('cyberpunk');
-                changeAspect('1:1');
-            }
+// ═══════════════ MEAL TRACKER ═══════════════
+function genId() { return 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2,6); }
 
-            if (restored) {
-                showToast("<i class='fa-solid fa-database text-cyan-400 mr-2'></i> PREVIOUS SESSION RESTORED FROM LOCAL STORAGE.");
-            }
-        };
-    </script>
+function addMealItem() {
+  const category = document.getElementById('newMealCategory').value;
+  const name     = document.getElementById('newMealName').value.trim().toUpperCase() || `MEAL_${loggedMeals.length+1}`;
+  const cals     = Math.max(0, parseInt(document.getElementById('newMealCals').value)      || 0);
+  const protein  = Math.max(0, parseFloat(document.getElementById('newMealProtein').value) || 0);
+  const carbs    = Math.max(0, parseFloat(document.getElementById('newMealCarbs').value)   || 0);
+  const fat      = Math.max(0, parseFloat(document.getElementById('newMealFat').value)     || 0);
+  const meal = { id: genId(), category, name, cals, protein, carbs, fat, fiber: 0, aiScanned: false, photoDataUrl: pendingMealPhotoDataUrl || null };
+  loggedMeals.push(meal);
+  ['newMealName','newMealCals','newMealProtein','newMealCarbs','newMealFat'].forEach(id => document.getElementById(id).value = '');
+  pendingMealPhotoDataUrl = null;
+  document.getElementById('mealPhotoPreviewRow').classList.add('hidden');
+  document.getElementById('mealPhotoThumb').src = '';
+  const catLabel = { breakfast:'🌅 BFAST', lunch:'☀️ LUNCH', dinner:'🌙 DINNER', snacks:'⚡ SNACKS' }[category];
+  showToast(`<i class='fa-solid fa-check text-emerald-400 mr-2'></i> [${catLabel}] ${name} — ${cals} KCAL LOGGED`);
+  updateAll();
+}
+
+function deleteMealItem(id) {
+  const idx = loggedMeals.findIndex(m => m.id === id);
+  if (idx === -1) return;
+  const removed = loggedMeals[idx];
+  loggedMeals.splice(idx, 1);
+  if (currentPage >= loggedMeals.length + 1) currentPage = Math.max(0, loggedMeals.length);
+  showToast(`<i class='fa-solid fa-trash text-amber-400 mr-2'></i> REMOVED: ${removed.name}`);
+  updateAll();
+}
+
+// ═══════════════ MEAL PHOTO (manual add) ═══════════════
+function triggerMealPhotoUpload() {
+  document.getElementById('mealPhotoAttachInput').click();
+}
+function handleMealPhotoAttach(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    pendingMealPhotoDataUrl = e.target.result;
+    document.getElementById('mealPhotoThumb').src = pendingMealPhotoDataUrl;
+    document.getElementById('mealPhotoPreviewRow').classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+function removeMealPhoto() {
+  pendingMealPhotoDataUrl = null;
+  document.getElementById('mealPhotoPreviewRow').classList.add('hidden');
+  document.getElementById('mealPhotoThumb').src = '';
+  document.getElementById('mealPhotoAttachInput').value = '';
+}
+
+// ═══════════════ ATTACH PHOTO TO EXISTING MEAL ═══════════════
+function attachPhotoToMeal(mealId) {
+  photoModalMode   = 'attach';
+  photoModalMealId = mealId;
+  const meal = loggedMeals.find(m => m.id === mealId);
+  document.getElementById('photoModalTitle').textContent = 'ATTACH FOOD PHOTO';
+  document.getElementById('photoModalSub').textContent   = `ATTACH OR REPLACE PHOTO FOR: ${meal?.name || mealId}`;
+  document.getElementById('photoNewMealFields').classList.add('hidden');
+  document.getElementById('aiResultPanel').classList.add('hidden');
+  document.getElementById('btnScanLabel').textContent = 'AI ANALYZE';
+  document.getElementById('btnLogLabel').textContent  = 'ATTACH PHOTO';
+  document.getElementById('btnScanPhoto').disabled   = true;
+  document.getElementById('btnLogDetected').disabled = false; // can attach without AI
+  // If meal already has a photo, show it
+  if (meal?.photoDataUrl) {
+    document.getElementById('photoEmptyState').classList.add('hidden');
+    document.getElementById('photoPreviewState').classList.remove('hidden');
+    document.getElementById('photoPreviewImg').src = meal.photoDataUrl;
+    photoBase64 = meal.photoDataUrl.split(',')[1] || null;
+  }
+  document.getElementById('photoModal').classList.add('open');
+}
+
+function viewMealPhoto(mealId) {
+  attachPhotoToMeal(mealId); // reuse the modal to view/replace
+}
+
+// ═══════════════ PHOTO MODAL ═══════════════
+function openPhotoModalForNewMeal() {
+  photoModalMode   = 'new';
+  photoModalMealId = null;
+  photoBase64      = null;
+  aiResult         = {};
+  document.getElementById('photoModalTitle').textContent = 'AI FOOD SCANNER';
+  document.getElementById('photoModalSub').textContent   = 'PHOTO → CALORIES + MACROS';
+  document.getElementById('photoNewMealFields').classList.remove('hidden');
+  document.getElementById('aiResultPanel').classList.add('hidden');
+  document.getElementById('photoStatusBar').classList.add('hidden');
+  document.getElementById('photoScanOverlay').classList.add('hidden');
+  document.getElementById('photoEmptyState').classList.remove('hidden');
+  document.getElementById('photoPreviewState').classList.add('hidden');
+  document.getElementById('photoMealNameOverride').value = '';
+  document.getElementById('aiCalOverride').value = '';
+  document.getElementById('btnScanPhoto').disabled   = true;
+  document.getElementById('btnLogDetected').disabled = true;
+  document.getElementById('btnScanLabel').textContent = 'ANALYZE';
+  document.getElementById('btnLogLabel').textContent  = 'LOG MEAL';
+  document.getElementById('photoFileInput').value = '';
+  setPhotoCategory('breakfast');
+  document.getElementById('photoModal').classList.add('open');
+}
+
+function closePhotoModal() {
+  document.getElementById('photoModal').classList.remove('open');
+}
+
+function triggerCamera() {
+  const inp = document.getElementById('photoFileInput');
+  inp.setAttribute('capture','environment'); inp.click();
+}
+
+function handlePhotoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 10*1024*1024) { showToast("<i class='fa-solid fa-triangle-exclamation text-rose-500 mr-2'></i> FILE TOO LARGE (MAX 10MB)"); return; }
+  photoMimeType = file.type || 'image/jpeg';
+  const reader = new FileReader();
+  reader.onload = e => {
+    const url = e.target.result;
+    photoBase64 = url.split(',')[1];
+    document.getElementById('photoEmptyState').classList.add('hidden');
+    document.getElementById('photoPreviewState').classList.remove('hidden');
+    document.getElementById('photoPreviewImg').src = url;
+    document.getElementById('aiResultPanel').classList.add('hidden');
+    document.getElementById('photoStatusBar').classList.add('hidden');
+    document.getElementById('btnScanPhoto').disabled   = false;
+    if (photoModalMode === 'attach') document.getElementById('btnLogDetected').disabled = false;
+    else document.getElementById('btnLogDetected').disabled = true;
+  };
+  reader.readAsDataURL(file);
+}
+
+function setPhotoCategory(cat) {
+  photoCategory = cat;
+  const styles = { breakfast:'bg-amber-500/20 text-amber-300 border-amber-500/30', lunch:'bg-yellow-500/20 text-yellow-300 border-yellow-500/30', dinner:'bg-blue-500/20 text-blue-300 border-blue-500/30', snacks:'bg-violet-500/20 text-violet-300 border-violet-500/30' };
+  ['breakfast','lunch','dinner','snacks'].forEach(c => {
+    const btn = document.getElementById('photoCat'+c.charAt(0).toUpperCase()+c.slice(1));
+    if (!btn) return;
+    btn.className = `py-1.5 rounded-lg font-mono text-[9px] text-center transition-all border ${c===cat ? styles[c] : 'bg-slate-900 text-slate-500 border-slate-800'}`;
+  });
+}
+
+function commitPhotoAction() {
+  if (photoModalMode === 'attach') {
+    // Just attach the currently previewed photo to the meal
+    const meal = loggedMeals.find(m => m.id === photoModalMealId);
+    if (meal && photoBase64) {
+      const img = document.getElementById('photoPreviewImg');
+      meal.photoDataUrl = img.src;
+      updateAll();
+      showToast(`<i class='fa-solid fa-image text-cyan-400 mr-2'></i> PHOTO ATTACHED TO ${meal.name}`);
+    }
+    closePhotoModal();
+  } else {
+    logDetectedMeal();
+  }
+}
+
+async function scanPhotoCalories() {
+  if (!photoBase64) return;
+  document.getElementById('btnScanPhoto').disabled   = true;
+  document.getElementById('btnLogDetected').disabled = true;
+  document.getElementById('aiResultPanel').classList.add('hidden');
+  document.getElementById('photoStatusBar').classList.remove('hidden');
+  document.getElementById('photoScanOverlay').classList.remove('hidden');
+  const msgs = [
+    "<i class='fa-solid fa-circle-notch animate-spin mr-2'></i> UPLOADING FOOD SIGNATURE...",
+    "<i class='fa-solid fa-circle-notch animate-spin mr-2'></i> RUNNING NEURAL FOOD RECOGNITION...",
+    "<i class='fa-solid fa-circle-notch animate-spin mr-2'></i> COMPUTING MACRO BREAKDOWN...",
+    "<i class='fa-solid fa-circle-notch animate-spin mr-2'></i> CROSS-REFERENCING CALORIC DATABASE...",
+  ];
+  let mi = 0;
+  const sEl = document.getElementById('photoStatusText');
+  sEl.innerHTML = msgs[0];
+  const iv = setInterval(()=>{ mi=(mi+1)%msgs.length; sEl.innerHTML=msgs[mi]; }, 1300);
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        model:"claude-sonnet-4-20250514", max_tokens:1000,
+        system:`You are a nutritionist AI. Respond ONLY with a single JSON object, no markdown or prose.
+Required fields: { "food_name":"ALL CAPS max 5 words", "calories":<int>, "protein":<int>, "carbs":<int>, "fat":<int>, "fiber":<int>, "confidence":"HIGH"|"MEDIUM"|"LOW", "serving_note":"brief serving assumption", "breakdown":"max 120 chars on key ingredients" }
+Verify: calories ≈ protein*4 + carbs*4 + fat*9. If unidentifiable: all zeros, confidence LOW.`,
+        messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:photoMimeType,data:photoBase64}},{type:"text",text:"Analyze this food image."}]}]
+      })
+    });
+    clearInterval(iv);
+    if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e?.error?.message||`API ${resp.status}`); }
+    const data = await resp.json();
+    const raw  = data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+    aiResult   = JSON.parse(raw.replace(/```json|```/gi,'').trim());
+    document.getElementById('aiDetectedFood').textContent  = aiResult.food_name||'FOOD';
+    document.getElementById('aiServingNote').textContent   = aiResult.serving_note||'';
+    document.getElementById('aiDetectedCals').textContent  = Math.max(0,parseInt(aiResult.calories)||0);
+    document.getElementById('aiProtein').textContent       = Math.max(0,parseInt(aiResult.protein)||0);
+    document.getElementById('aiCarbs').textContent         = Math.max(0,parseInt(aiResult.carbs)||0);
+    document.getElementById('aiFat').textContent           = Math.max(0,parseInt(aiResult.fat)||0);
+    document.getElementById('aiFiber').textContent         = Math.max(0,parseInt(aiResult.fiber)||0);
+    document.getElementById('aiBreakdownNote').textContent = aiResult.breakdown||'';
+    document.getElementById('aiCalOverride').value         = Math.max(0,parseInt(aiResult.calories)||0);
+    const conf = aiResult.confidence||'MEDIUM';
+    const badge = document.getElementById('aiConfidenceBadge');
+    badge.textContent = `CONF: ${conf}`;
+    badge.className = `text-[9px] font-mono px-2 py-0.5 rounded border ${conf==='HIGH'?'bg-emerald-950/50 border-emerald-500/30 text-emerald-300':conf==='LOW'?'bg-rose-950/50 border-rose-500/30 text-rose-300':'bg-amber-950/50 border-amber-500/30 text-amber-300'}`;
+    if (!document.getElementById('photoMealNameOverride').value.trim())
+      document.getElementById('photoMealNameOverride').value = aiResult.food_name||'';
+    document.getElementById('photoScanOverlay').classList.add('hidden');
+    document.getElementById('photoStatusBar').classList.add('hidden');
+    document.getElementById('aiResultPanel').classList.remove('hidden');
+    document.getElementById('btnLogDetected').disabled = false;
+    document.getElementById('btnScanPhoto').disabled   = false;
+  } catch(err) {
+    clearInterval(iv);
+    document.getElementById('photoScanOverlay').classList.add('hidden');
+    document.getElementById('photoStatusBar').classList.add('hidden');
+    document.getElementById('btnScanPhoto').disabled = false;
+    showToast(`<i class='fa-solid fa-triangle-exclamation text-rose-500 mr-2'></i> SCAN FAILED: ${String(err.message).slice(0,60)}`);
+  }
+}
+
+function logDetectedMeal() {
+  const imgEl  = document.getElementById('photoPreviewImg');
+  const photoUrl = (imgEl.src && imgEl.src.startsWith('data:')) ? imgEl.src : null;
+  const name   = document.getElementById('photoMealNameOverride').value.trim().toUpperCase() || aiResult.food_name || 'AI_DETECTED';
+  const cals   = Math.max(0, parseInt(document.getElementById('aiCalOverride').value) || parseInt(aiResult.calories)||0);
+  const meal   = {
+    id: genId(), category: photoCategory, name, cals,
+    protein: Math.max(0, parseInt(aiResult.protein)||0),
+    carbs:   Math.max(0, parseInt(aiResult.carbs)||0),
+    fat:     Math.max(0, parseInt(aiResult.fat)||0),
+    fiber:   Math.max(0, parseInt(aiResult.fiber)||0),
+    aiScanned: true,
+    photoDataUrl: photoUrl
+  };
+  loggedMeals.push(meal);
+  updateAll();
+  const catLabel = {breakfast:'🌅 BFAST',lunch:'☀️ LUNCH',dinner:'🌙 DINNER',snacks:'⚡ SNACKS'}[photoCategory];
+  showToast(`<i class='fa-solid fa-camera text-cyan-400 mr-2'></i> [${catLabel}] ${name}: ${cals} kcal · ${meal.protein}p/${meal.carbs}c/${meal.fat}f`);
+  closePhotoModal();
+}
+
+// Drag & drop
+const dz = document.getElementById('photoDropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('border-cyan-400/80');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('border-cyan-400/80'));
+dz.addEventListener('drop',e=>{
+  e.preventDefault(); dz.classList.remove('border-cyan-400/80');
+  const f=e.dataTransfer.files[0];
+  if(f&&f.type.startsWith('image/')){
+    const dt=new DataTransfer();dt.items.add(f);
+    document.getElementById('photoFileInput').files=dt.files;
+    handlePhotoUpload({target:{files:dt.files}});
+  }
+});
+document.getElementById('photoModal').addEventListener('click',e=>{if(e.target===document.getElementById('photoModal'))closePhotoModal();});
+document.getElementById('historyModal').addEventListener('click',e=>{if(e.target===document.getElementById('historyModal'))closeHistoryModal();});
+
+// ═══════════════ UNIT SYSTEM ═══════════════
+function applyUnitLabels() {
+  const wu = unitSystem==='metric'?'kg':'lbs', hu = unitSystem==='metric'?'cm':'in';
+  document.getElementById('weightUnitText').textContent = wu;
+  document.getElementById('muscleUnitText').textContent = wu;
+  document.getElementById('heightUnitText').textContent = hu;
+  const aM='py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all bg-cyan-500/20 text-cyan-300 border border-cyan-500/30';
+  const aI='py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30';
+  const off='py-1.5 rounded-md text-xs font-mono font-bold tracking-wider transition-all text-slate-500 hover:text-slate-300';
+  document.getElementById('btnMetric').className   = unitSystem==='metric'?aM:off;
+  document.getElementById('btnImperial').className = unitSystem==='imperial'?aI:off;
+}
+function setUnitSystem(sys) {
+  unitSystem=sys;
+  if(sys==='metric'){document.getElementById('weight').value='72.5';document.getElementById('height').value='175';document.getElementById('muscle').value='58.2';}
+  else{document.getElementById('weight').value='160';document.getElementById('height').value='69';document.getElementById('muscle').value='128.5';}
+  applyUnitLabels(); updateAll();
+}
+
+// ═══════════════ THEME / ASPECT ═══════════════
+function setTheme(key) {
+  currentTheme=key; saveGlobal(); renderCardPages();
+}
+function changeAspect(ratio) {
+  currentAspect=ratio;
+  const a='py-2 px-3 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono text-xs flex items-center justify-center gap-2';
+  const i='py-2 px-3 rounded bg-slate-900 text-slate-500 border border-slate-800 hover:text-slate-300 font-mono text-xs flex items-center justify-center gap-2';
+  document.getElementById('btnRatio11').className   = ratio==='1:1'?a:i;
+  document.getElementById('btnRatio916').className  = ratio==='9:16'?a:i;
+  saveGlobal(); renderCardPages();
+}
+
+// ═══════════════ EXPORT ═══════════════
+function exportCurrentPage() {
+  const vp = document.getElementById('cardViewport');
+  const activePage = vp.querySelector('.card-page.active');
+  if (!activePage) return;
+  const cardEl = activePage.firstElementChild;
+  showToast("<i class='fa-solid fa-spinner animate-spin mr-2'></i> RENDERING PAGE...");
+  html2canvas(cardEl, {backgroundColor:'#05080e',scale:2.5,logging:false,useCORS:true,allowTaint:true}).then(canvas=>{
+    const link=document.createElement('a');
+    const subj=document.getElementById('subjectName').value.toUpperCase()||'AGENT';
+    link.download=`AURA_${subj}_${viewingDate}_p${currentPage+1}.png`;
+    link.href=canvas.toDataURL('image/png').replace('image/png','image/octet-stream');
+    document.body.appendChild(link);link.click();document.body.removeChild(link);
+    showToast("<i class='fa-solid fa-check text-emerald-400 mr-2'></i> PAGE EXPORTED.");
+  }).catch(()=>showToast("<i class='fa-solid fa-triangle-exclamation text-rose-500 mr-2'></i> EXPORT FAILED."));
+}
+
+async function exportAllPages() {
+  const vp = document.getElementById('cardViewport');
+  const pages = vp.querySelectorAll('.card-page');
+  const total = pages.length;
+  showToast(`<i class='fa-solid fa-spinner animate-spin mr-2'></i> EXPORTING ${total} PAGES...`);
+  for (let i = 0; i < total; i++) {
+    goToPage(i);
+    await new Promise(r => setTimeout(r, 200));
+    const cardEl = pages[i].firstElementChild;
+    try {
+      const canvas = await html2canvas(cardEl, {backgroundColor:'#05080e',scale:2.5,logging:false,useCORS:true,allowTaint:true});
+      const link = document.createElement('a');
+      const subj = document.getElementById('subjectName').value.toUpperCase()||'AGENT';
+      link.download = `AURA_${subj}_${viewingDate}_p${i+1}.png`;
+      link.href = canvas.toDataURL('image/png').replace('image/png','image/octet-stream');
+      document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    } catch(e) {}
+    await new Promise(r => setTimeout(r, 300));
+  }
+  showToast(`<i class='fa-solid fa-check text-emerald-400 mr-2'></i> ALL ${total} PAGES EXPORTED.`);
+}
+
+// ═══════════════ MISC ═══════════════
+function clearToday() {
+  if (!confirm(`CLEAR ALL DATA FOR ${formatDateLabel(viewingDate)}?\nThis removes meals and biometrics for this day.`)) return;
+  localStorage.removeItem(DAY_PREFIX + viewingDate);
+  loggedMeals = [];
+  currentPage = 0;
+  updateAll();
+  updateStreakDisplay();
+  showToast("<i class='fa-solid fa-trash text-amber-400 mr-2'></i> DAY DATA CLEARED.");
+}
+
+function updateStorageStatus(ok, iso) {
+  const last = document.getElementById('lastSavedText');
+  if (ok && iso) {
+    const d=new Date(iso),p=n=>String(n).padStart(2,'0');
+    last.textContent=`LAST SAVE: ${d.getFullYear()}.${p(d.getMonth()+1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  }
+}
+
+function showToast(msg) {
+  const t=document.getElementById('toastNotification');
+  document.getElementById('toastMsg').innerHTML=msg;
+  t.style.opacity='1'; t.style.pointerEvents='auto';
+  clearTimeout(t._tid);
+  t._tid=setTimeout(()=>{t.style.opacity='0';t.style.pointerEvents='none';},4500);
+}
+function hideToast() {
+  const t=document.getElementById('toastNotification');
+  t.style.opacity='0'; t.style.pointerEvents='none';
+}
+
+// ═══════════════ BOOT ═══════════════
+window.onload = function() {
+  loadGlobal();
+  applyUnitLabels();
+  if (currentTheme)  setTheme(currentTheme);
+  if (currentAspect) changeAspect(currentAspect);
+  if (bodyGoal)      setGoal(bodyGoal);
+  viewingDate    = todayStr();
+  isViewingToday = true;
+  loadDay(viewingDate);
+  updateStreakDisplay();
+  updateDateDisplay();
+  const hasTodayData = !!localStorage.getItem(DAY_PREFIX + viewingDate);
+  if (hasTodayData) showToast("<i class='fa-solid fa-database text-cyan-400 mr-2'></i> TODAY'S SESSION RESTORED.");
+};
+</script>
 </body>
 </html>
