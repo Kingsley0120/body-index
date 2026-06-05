@@ -19,8 +19,8 @@
 @keyframes ai-scan{0%{top:0%}100%{top:100%}}
 .ai-scan-line{animation:ai-scan 1.2s linear infinite}
 .bar-fill{transition:width 0.6s cubic-bezier(.4,0,.2,1)}
-.modal-base{transition:opacity .22s ease;opacity:0;pointer-events:none}
-.modal-base.open{opacity:1;pointer-events:auto}
+.modal-base{transition:opacity .22s ease;opacity:0;pointer-events:none !important}
+.modal-base.open{opacity:1 !important;pointer-events:auto !important}
 /* card pages */
 #cardViewport{position:relative;overflow:hidden}
 .card-page{position:absolute;inset:0;transition:transform .4s cubic-bezier(.4,0,.2,1),opacity .4s ease;opacity:0;pointer-events:none}
@@ -44,7 +44,7 @@
 <!-- ════════════════════════════════════════════
      PHOTO / AI SCANNER MODAL
 ════════════════════════════════════════════ -->
-<div id="photoModal" class="modal-base fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
+<div id="photoModal" class="modal-base pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
   <div class="bg-[#070c14] border border-cyan-500/30 rounded-2xl w-full max-w-lg relative shadow-2xl my-auto">
     <div class="absolute top-0 left-0 w-8 h-[1px] bg-cyan-500"></div><div class="absolute top-0 left-0 w-[1px] h-8 bg-cyan-500"></div>
     <div class="absolute bottom-0 right-0 w-8 h-[1px] bg-fuchsia-500"></div><div class="absolute bottom-0 right-0 w-[1px] h-8 bg-fuchsia-500"></div>
@@ -137,7 +137,7 @@
 <!-- ════════════════════════════════════════════
      HISTORY / DAY BROWSER MODAL
 ════════════════════════════════════════════ -->
-<div id="historyModal" class="modal-base fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
+<div id="historyModal" class="modal-base pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
   <div class="bg-[#070c14] border border-violet-500/30 rounded-2xl w-full max-w-xl relative shadow-2xl my-auto">
     <div class="absolute top-0 left-0 w-8 h-[1px] bg-violet-500"></div><div class="absolute top-0 left-0 w-[1px] h-8 bg-violet-500"></div>
     <div class="px-5 pt-5 pb-3 border-b border-slate-800 flex items-center justify-between">
@@ -173,7 +173,7 @@
 <!-- ════════════════════════════════════════════
      PROXY SETUP MODAL
 ════════════════════════════════════════════ -->
-<div id="proxySetupModal" class="modal-base fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+<div id="proxySetupModal" class="modal-base pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
   <div class="bg-[#070c14] border border-amber-500/30 rounded-2xl w-full max-w-lg shadow-2xl relative overflow-hidden">
     <div class="absolute top-0 left-0 w-8 h-[1px] bg-amber-500"></div>
     <div class="absolute top-0 left-0 w-[1px] h-8 bg-amber-500"></div>
@@ -647,10 +647,10 @@ function loadGlobal() {
 // ═══════════════ HISTORY MODAL ═══════════════
 function openHistoryModal() {
   renderHistoryList();
-  document.getElementById('historyModal').classList.add('open');
+  document.getElementById('historyModal').classList.add('open'); document.getElementById('historyModal').classList.remove('pointer-events-none');
 }
 function closeHistoryModal() {
-  document.getElementById('historyModal').classList.remove('open');
+  document.getElementById('historyModal').classList.remove('open'); document.getElementById('historyModal').classList.add('pointer-events-none');
 }
 function renderHistoryList() {
   const container = document.getElementById('historyList');
@@ -1122,7 +1122,7 @@ function attachPhotoToMeal(mealId) {
     document.getElementById('photoPreviewImg').src = meal.photoDataUrl;
     photoBase64 = meal.photoDataUrl.split(',')[1] || null;
   }
-  document.getElementById('photoModal').classList.add('open');
+  document.getElementById('photoModal').classList.add('open'); document.getElementById('photoModal').classList.remove('pointer-events-none');
 }
 
 function viewMealPhoto(mealId) {
@@ -1151,11 +1151,11 @@ function openPhotoModalForNewMeal() {
   document.getElementById('btnLogLabel').textContent  = 'LOG MEAL';
   document.getElementById('photoFileInput').value = '';
   setPhotoCategory('breakfast');
-  document.getElementById('photoModal').classList.add('open');
+  document.getElementById('photoModal').classList.add('open'); document.getElementById('photoModal').classList.remove('pointer-events-none');
 }
 
 function closePhotoModal() {
-  document.getElementById('photoModal').classList.remove('open');
+  document.getElementById('photoModal').classList.remove('open'); document.getElementById('photoModal').classList.add('pointer-events-none');
 }
 
 function triggerCamera() {
@@ -1501,7 +1501,7 @@ function openProxySetup() {
   if (PROXY_URL) { input.value = PROXY_URL; display.textContent = PROXY_URL; }
   else { input.value = ''; display.textContent = 'NOT SET'; }
   document.getElementById('proxyTestResult').classList.add('hidden');
-  document.getElementById('proxySetupModal').classList.add('open');
+  document.getElementById('proxySetupModal').classList.add('open'); document.getElementById('proxySetupModal').classList.remove('pointer-events-none');
 }
 
 function updateProxyBtn() {
@@ -1519,7 +1519,7 @@ function updateProxyBtn() {
 }
 
 function closeProxySetup() {
-  document.getElementById('proxySetupModal').classList.remove('open');
+  document.getElementById('proxySetupModal').classList.remove('open'); document.getElementById('proxySetupModal').classList.add('pointer-events-none');
 }
 
 async function testAndSaveProxy() {
